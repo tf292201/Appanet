@@ -1,0 +1,28 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Appanet"
+run/main_scene="uid://coy1jmbau3as8"
+config/features=PackedStringArray("4.5", "C#", "Mobile")
+config/icon="res://icon.svg"
+
+[autoload]
+
+GameManager="*res://Managers/GameManager.cs"
+
+[dotnet]
+
+project/assembly_name="Appanet"
+
+[rendering]
+
+renderer/rendering_method="mobile"

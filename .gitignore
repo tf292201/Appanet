@@ -1,0 +1,20 @@
+# Godot-specific ignores
+.import/
+export.cfg
+export_presets.cfg
+.mono/
+data_*/
+
+# Mono-specific ignores (C#)
+.mono/
+.msbuild/
+.vscode/
+*.csproj
+*.sln
+
+# General ignores
+*.swp
+*.bak
+*~
+.DS_Store
+*.uid

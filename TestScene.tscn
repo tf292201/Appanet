@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://kyllgaq2irk4"]
+
+[ext_resource type="Script" uid="uid://dx8vo5a5wthlv" path="res://Scripts/TestButton.cs" id="1_mncer"]
+
+[node name="TestScene" type="Control"]
+layout_mode = 3
+anchor_right = 0.33600003
+anchor_bottom = 0.51500005
+offset_right = -387.07202
+offset_bottom = -333.72003
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 21.0
+offset_right = 204.0
+offset_bottom = 129.0
+script = ExtResource("1_mncer")

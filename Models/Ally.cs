@@ -1,0 +1,106 @@
+
+using System;
+using Godot;
+
+namespace Appanet.Scripts.Models
+{
+	public class Ally : Character
+	{
+		public string AllyID { get; private set; }
+		public Inventory Inventory { get; private set; }  // ADD THIS
+		public Weapon EquippedWeapon { get; private set; }  // ADD THIS
+		
+		public Ally(string id, string name, int maxHealth, int attackPower, int defense)
+			: base(name, maxHealth, attackPower, defense)
+		{
+			AllyID = id;
+			Inventory = new Inventory(10);  // ADD THIS - smaller inventory than player
+		}
+		
+		// ADD THESE METHODS
+		public void EquipWeapon(Weapon weapon)
+		{
+			if (EquippedWeapon != null)
+			{
+				Inventory.AddItem(EquippedWeapon);
+			}
+			
+			EquippedWeapon = weapon;
+			Inventory.RemoveItem(weapon);
+		}
+		
+		public override AttackResult AttackWithResult()
+		{
+  		  int baseAttack = AttackPower;
+  		  int weaponBonus = EquippedWeapon?.AttackBonus ?? 0;
+  		  int totalAttack = baseAttack + weaponBonus;
+	
+  		  int minDamage = totalAttack * 80 / 100;
+  		  int maxDamage = totalAttack * 120 / 100;
+  		  Random rand = new Random();
+  		  int varianceDamage = rand.Next(minDamage, maxDamage + 1);
+	
+  		  bool isCrit = rand.Next(1, 101) <= 10;
+	
+  		  int finalDamage = isCrit ? (int)(varianceDamage * 1.5) : varianceDamage;
+	
+  		  DamageType damageType = EquippedWeapon?.DamageType ?? DamageType.Physical;
+	
+  		  return new AttackResult(finalDamage, isCrit, damageType);
+		}
+		
+		public override int Attack()
+		{
+ 		   return AttackWithResult().Damage;
+		}
+		
+		// Factory methods stay the same
+		public static Ally CreateMichaelWebb()
+		{
+			var michael = new Ally(
+				"michael",
+				"Michael Webb",
+				80,
+				12,
+				4
+			);
+			return michael;
+		}
+		
+		public static Ally CreateDima()
+		{
+			var dima = new Ally(
+				"dima",
+				"Dima Volkov",
+				70,
+				8,
+				6
+			);
+			return dima;
+		}
+		
+		public static Ally CreateCase()
+		{
+			var case_ally = new Ally(
+				"case",
+				"Casey Whitmore",
+				90,
+				14,
+				3
+			);
+			case_ally.DodgeChance = 0.15f;
+			return case_ally;
+		}
+		
+		public override void EquipArmor(Armor armor)
+		{
+  		  if (EquippedArmor != null)
+  		  {
+   			 Inventory.AddItem(EquippedArmor);
+   		  }
+	
+  			  EquippedArmor = armor;
+  			  Inventory.RemoveItem(armor);
+			}
+	}
+}

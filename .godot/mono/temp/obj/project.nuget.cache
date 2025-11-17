@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "sjFPIQvvjGcBnOZF9EUuAkHl7fHnESbQgxuk6RK6gdYrfiu6JONmo8lbB/5lz33pqDf3zkA/2w5bfgFCr+P8DQ==",
+  "success": true,
+  "projectFilePath": "/home/thomas/appanet/Appanet.csproj",
+  "expectedPackageFiles": [
+    "/home/thomas/.nuget/packages/godot.sourcegenerators/4.5.1/godot.sourcegenerators.4.5.1.nupkg.sha512",
+    "/home/thomas/.nuget/packages/godotsharp/4.5.1/godotsharp.4.5.1.nupkg.sha512",
+    "/home/thomas/.nuget/packages/godotsharpeditor/4.5.1/godotsharpeditor.4.5.1.nupkg.sha512"
+  ],
+  "logs": []
+}

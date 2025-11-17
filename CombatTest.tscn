@@ -1,0 +1,131 @@
+[gd_scene load_steps=3 format=3 uid="uid://coy1jmbau3as8"]
+
+[ext_resource type="Script" uid="uid://8bvutd0syfi5" path="res://CombatTestController.cs" id="1_oehq7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o70s7"]
+bg_color = Color(0.30980393, 0.30980393, 0.5921569, 1)
+
+[node name="CombatTest" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.34901962, 1, 1, 0.13725491)
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -131.5
+offset_right = 131.5
+offset_bottom = 23.0
+grow_horizontal = 2
+text = "Combat Test - Party Battle System"
+horizontal_alignment = 1
+
+[node name="MainLayout" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(50, 80)
+layout_mode = 0
+offset_right = 1100.0
+offset_bottom = 300.0
+theme_override_constants/separation = 50
+
+[node name="PlayerTeamPanel" type="VBoxContainer" parent="MainLayout"]
+custom_minimum_size = Vector2(500, 280)
+layout_mode = 2
+
+[node name="PlayerTeamTitle" type="Label" parent="MainLayout/PlayerTeamPanel"]
+layout_mode = 2
+text = "====PLAYER TEAM===
+"
+horizontal_alignment = 1
+
+[node name="PlayerTeam" type="VBoxContainer" parent="MainLayout/PlayerTeamPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EnemyTeamPanel" type="VBoxContainer" parent="MainLayout"]
+custom_minimum_size = Vector2(500, 280)
+layout_mode = 2
+
+[node name="EnemyTeamTitle" type="Label" parent="MainLayout/EnemyTeamPanel"]
+layout_mode = 2
+text = "===ENEMY TEAM===
+
+"
+horizontal_alignment = 1
+
+[node name="EnemyTeam" type="VBoxContainer" parent="MainLayout/EnemyTeamPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CombatLog" type="RichTextLabel" parent="."]
+layout_mode = 0
+offset_left = 476.0
+offset_top = 324.0
+offset_right = 1102.0
+offset_bottom = 521.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_o70s7")
+bbcode_enabled = true
+text = "combat log
+"
+scroll_following = true
+horizontal_alignment = 1
+
+[node name="ActionButtons" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 374.0
+offset_top = 533.0
+offset_right = 774.0
+offset_bottom = 593.0
+theme_override_constants/separation = 20
+
+[node name="AttackBtn" type="Button" parent="ActionButtons"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "⚔️ Attack"
+
+[node name="ItemBtn" type="Button" parent="ActionButtons"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "💊 Use Item
+"
+
+[node name="FleeBtn" type="Button" parent="ActionButtons"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "🏃 Flee"
+
+[node name="TargetSelection" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -126.0
+offset_top = -24.0
+offset_right = 174.0
+offset_bottom = 376.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CombatController" type="Node" parent="."]
+script = ExtResource("1_oehq7")
+
+[node name="Background2" type="ColorRect" parent="."]
+layout_mode = 0
+size_flags_horizontal = 3
+color = Color(0.93823576, 0.96994334, 0.9323928, 1)
