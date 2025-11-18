@@ -2,6 +2,7 @@ using Godot;
 using Appanet.Scripts.Models;
 using Appanet.Scripts.Managers;
 using System.Collections.Generic;
+using Appanet.Scripts.Combat;
 using System.Linq;
 
 namespace Appanet.Scripts.Tests
@@ -21,6 +22,8 @@ namespace Appanet.Scripts.Tests
 		private VBoxContainer _targetSelection;
 		private Label _turnIndicator;
 		private Consumable _selectedItem;
+		private CombatParticipant _pendingAttackTarget;  // ← ADD THIS
+		private float _currentAttackMultiplier = 1.0f;   
 		
 		public override void _Ready()
 		{
@@ -88,6 +91,7 @@ private void InitializeCombat()
 	_combat.OnCombatEnd += OnCombatEnd;
 	_combat.OnCombatLog += Log;
 	
+	
 	_combat.StartCombat();
 	
 	UpdateUI();
@@ -118,17 +122,18 @@ private void InitializeCombat()
 		UpdateUI();
 		_turnIndicator.Text = $"Choose action for: {_currentActorSelecting.GetDisplayName()}";
 		
-		// Check if this actor can use items
-		if (_currentActorSelecting.Character is Player player)
+		// Get player to check party inventory
+		var player = _combat.PlayerTeam.FirstOrDefault(p => p.Character is Player)?.Character as Player;
+		
+		// Enable item button if party has ANY consumables
+		if (player != null)
 		{
-			// Enable item button if player has ANY consumables
-			var hasConsumables = player.Inventory.GetAllItems()
-				.Any(item => item is Consumable);
+			var hasConsumables = player.Inventory.GetAllItems().Any(item => item is Consumable);
 			_itemBtn.Disabled = !hasConsumables;
 		}
 		else
 		{
-			_itemBtn.Disabled = true;  // Allies can't use items
+			_itemBtn.Disabled = true;
 		}
 	}
 }
@@ -147,10 +152,7 @@ private void InitializeCombat()
 			_turnIndicator.Text = "";
 		}
 		
-		private void OnAttackButtonPressed()
-		{
-			ShowTargetSelection();
-		}
+
 		
 		private void ShowTargetSelection()
 		{
@@ -198,99 +200,15 @@ private void InitializeCombat()
 		}
 		
 		private void OnTargetSelected(CombatParticipant target)
-		{
-			_combat.QueueAction(_currentActorSelecting, target, "Attack");
-			_targetSelection.Visible = false;
-			UpdateUI();
-			PromptNextAction();
-		}
-		
-		private void OnItemButtonPressed()
 {
-	if (_currentActorSelecting.Character is Player player)
-	{
-		ShowItemSelection(player);
-	}
-}
-
-private void ShowItemSelection(Player player)
-{
-	_targetSelection.Visible = true;
-	_actionButtons.Visible = false;
+	// Store the target for after the minigame
+	_pendingAttackTarget = target;
 	
-	// Clear previous buttons
-	foreach (Node child in _targetSelection.GetChildren())
-	{
-		child.QueueFree();
-	}
+	// Hide target selection
+	_targetSelection.Visible = false;
 	
-	// Add title
-	var title = new Label();
-	title.Text = "Select Item to Use:";
-	title.HorizontalAlignment = HorizontalAlignment.Center;
-	title.AddThemeColorOverride("font_color", new Color(0, 1, 1));
-	_targetSelection.AddChild(title);
-	
-	// Get all consumables from inventory
-	var consumables = player.Inventory.GetAllItems()
-		.Where(item => item is Consumable)
-		.Cast<Consumable>()
-		.ToList();
-	
-	if (consumables.Count == 0)
-	{
-		var noItemsLabel = new Label();
-		noItemsLabel.Text = "No consumables available!";
-		noItemsLabel.HorizontalAlignment = HorizontalAlignment.Center;
-		_targetSelection.AddChild(noItemsLabel);
-	}
-	else
-	{
-		// Group by item name to show quantities
-		var groupedItems = consumables
-			.GroupBy(c => c.Name)
-			.Select(g => new { Item = g.First(), Count = g.Count() });
-		
-		foreach (var group in groupedItems)
-		{
-			var btn = new Button();
-			btn.Text = $"{group.Item.Name} ({group.Count}x)\nHeals: {group.Item.HealAmount} HP";
-			btn.CustomMinimumSize = new Vector2(250, 60);
-			
-			// Disable if at full health
-			bool canUse = player.Health < player.MaxHealth;
-			btn.Disabled = !canUse;
-			
-			if (canUse)
-			{
-				var itemToUse = group.Item;
-				btn.Pressed += () => OnItemSelected(itemToUse);
-			}
-			
-			_targetSelection.AddChild(btn);
-		}
-	}
-	
-	// Add separator
-	var separator = new HSeparator();
-	_targetSelection.AddChild(separator);
-	
-	// Add cancel button
-	var cancelBtn = new Button();
-	cancelBtn.Text = "← Back";
-	cancelBtn.CustomMinimumSize = new Vector2(250, 40);
-	cancelBtn.Pressed += () =>
-	{
-		_targetSelection.Visible = false;
-		_actionButtons.Visible = true;
-	};
-	_targetSelection.AddChild(cancelBtn);
-}
-
-private void OnItemSelected(Consumable item)
-{
-	_selectedItem = item;
-	ShowHealTargetSelection();
+	// Launch the timing minigame
+	LaunchTimingMinigame();
 }
 
 private void ShowHealTargetSelection()
@@ -305,7 +223,7 @@ private void ShowHealTargetSelection()
 	
 	// Add title
 	var title = new Label();
-	title.Text = $"Who should use {_selectedItem.Name}?";
+	title.Text = $"{_currentActorSelecting.GetDisplayName()}: Who should use {_selectedItem.Name}?";
 	title.HorizontalAlignment = HorizontalAlignment.Center;
 	title.AddThemeColorOverride("font_color", new Color(0, 1, 0.5f));
 	_targetSelection.AddChild(title);
@@ -341,17 +259,19 @@ private void ShowHealTargetSelection()
 		_targetSelection.AddChild(btn);
 	}
 	
-	// Add separator (ONLY ONCE)
+	// Add separator
 	var separator = new HSeparator();
 	_targetSelection.AddChild(separator);
 	
-	// Add cancel button (ONLY ONCE)
+	// Add cancel button
 	var cancelBtn = new Button();
 	cancelBtn.Text = "← Back";
 	cancelBtn.CustomMinimumSize = new Vector2(250, 40);
 	cancelBtn.Pressed += () =>
 	{
-		if (_currentActorSelecting.Character is Player player)
+		// Get the player to pass to ShowItemSelection
+		var player = _combat.PlayerTeam.FirstOrDefault(p => p.Character is Player)?.Character as Player;
+		if (player != null)
 		{
 			ShowItemSelection(player);
 		}
@@ -359,10 +279,117 @@ private void ShowHealTargetSelection()
 	_targetSelection.AddChild(cancelBtn);
 }
 
+private void OnItemSelected(Consumable item)
+{
+	_selectedItem = item;
+	ShowHealTargetSelection();
+}
+		
+private void ShowItemSelection(Player player)
+{
+	_targetSelection.Visible = true;
+	_actionButtons.Visible = false;
+	
+	// Clear previous buttons
+	foreach (Node child in _targetSelection.GetChildren())
+	{
+		child.QueueFree();
+	}
+	
+	// Add title - show WHO is using the item
+	var title = new Label();
+	title.Text = $"{_currentActorSelecting.GetDisplayName()}: Select Item to Use";  // ← Changed
+	title.HorizontalAlignment = HorizontalAlignment.Center;
+	title.AddThemeColorOverride("font_color", new Color(0, 1, 1));
+	_targetSelection.AddChild(title);
+	
+	// Get all consumables from PARTY inventory (player's inventory)
+	var consumables = player.Inventory.GetAllItems()
+		.Where(item => item is Consumable)
+		.Cast<Consumable>()
+		.ToList();
+	
+	if (consumables.Count == 0)
+	{
+		var noItemsLabel = new Label();
+		noItemsLabel.Text = "No consumables available!";
+		noItemsLabel.HorizontalAlignment = HorizontalAlignment.Center;
+		_targetSelection.AddChild(noItemsLabel);
+	}
+	else
+	{
+		// Group by item name to show quantities
+		var groupedItems = consumables
+			.GroupBy(c => c.Name)
+			.Select(g => new { Item = g.First(), Count = g.Count() });
+		
+		foreach (var group in groupedItems)
+		{
+			var btn = new Button();
+			btn.Text = $"{group.Item.Name} ({group.Count}x)\nHeals: {group.Item.HealAmount} HP";
+			btn.CustomMinimumSize = new Vector2(250, 60);
+			
+			// Enable if ANY team member can be healed
+			bool anyoneNeedsHealing = _combat.GetAliveAllies().Any(ally => ally.Character.Health < ally.Character.MaxHealth);
+			btn.Disabled = !anyoneNeedsHealing;
+			
+			if (anyoneNeedsHealing)
+			{
+				var itemToUse = group.Item;
+				btn.Pressed += () => OnItemSelected(itemToUse);
+			}
+			
+			_targetSelection.AddChild(btn);
+		}
+	}
+	
+	// Add separator
+	var separator = new HSeparator();
+	_targetSelection.AddChild(separator);
+	
+	// Add cancel button
+	var cancelBtn = new Button();
+	cancelBtn.Text = "← Back";
+	cancelBtn.CustomMinimumSize = new Vector2(250, 40);
+	cancelBtn.Pressed += () =>
+	{
+		_targetSelection.Visible = false;
+		_actionButtons.Visible = true;
+	};
+	_targetSelection.AddChild(cancelBtn);
+}
+
+
+private void OnItemButtonPressed()
+{
+	// Get the player's inventory (shared party inventory)
+	var player = _combat.PlayerTeam.FirstOrDefault(p => p.Character is Player)?.Character as Player;
+	
+	if (player != null)
+	{
+		ShowItemSelection(player);
+	}
+}
+
+
+
 
 private void OnHealTargetSelected(CombatParticipant target)
 {
-	_combat.QueueAction(_currentActorSelecting, target, "UseItem", _selectedItem.Name);
+	// Get the player's inventory (party inventory)
+	var player = _combat.PlayerTeam.FirstOrDefault(p => p.Character is Player)?.Character as Player;
+	
+	if (player != null && _selectedItem != null)
+	{
+		// Remove the item from inventory NOW (when queuing, not when executing)
+		player.Inventory.RemoveItem(_selectedItem);
+		
+		// Queue the action with the item name
+		_combat.QueueAction(_currentActorSelecting, target, "UseItem", _selectedItem.Name);
+		
+		Log($"[Reserved] {_currentActorSelecting.GetDisplayName()} will use {_selectedItem.Name} on {target.GetDisplayName()}");
+	}
+	
 	_targetSelection.Visible = false;
 	_selectedItem = null;
 	PromptNextAction();
@@ -521,6 +548,51 @@ private void UpdateTeamDisplay(VBoxContainer container, List<CombatParticipant> 
 			_combatLog.AppendText(message + "\n");
 			_combatLog.GetVScrollBar().Value = _combatLog.GetVScrollBar().MaxValue;
 		}
+		
+		
+		private void OnAttackButtonPressed()
+		{
+			// Launch the timing minigame
+			ShowTargetSelection();
+		}
+
+private void LaunchTimingMinigame()
+{
+	// Load and instantiate the minigame
+	var minigameScene = GD.Load<PackedScene>("res://AttackTimingMinigame.tscn");
+	var minigame = minigameScene.Instantiate<Appanet.Scripts.Combat.AttackTimingMinigame>();
+	
+	// Add to scene tree (above other UI)
+	GetNode("..").AddChild(minigame);
+	
+	// Connect to the signal
+	minigame.TimingComplete += OnTimingComplete;
+}
+
+private void OnTimingComplete(float multiplier)
+{
+	// Show feedback
+	string feedback = multiplier switch
+	{
+		>= 2.0f => "⚡ PERFECT! Critical Hit!",
+		>= 1.5f => "✨ Great timing!",
+		>= 1.0f => "👍 Good hit",
+		>= 0.75f => "😐 Okay...",
+		_ => "💢 Weak hit..."
+	};
+	
+	Log($"{feedback} (x{multiplier:F1} damage)");
+	
+	// Queue the attack with the multiplier
+	_combat.QueueAction(_currentActorSelecting, _pendingAttackTarget, "Attack");
+	
+	// Store the multiplier for this specific action
+	_currentAttackMultiplier = multiplier;
+	
+	// Continue to next actor
+	UpdateUI();
+	PromptNextAction();
+}
 		
 		
 		

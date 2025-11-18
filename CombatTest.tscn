@@ -72,9 +72,9 @@ theme_override_constants/separation = 10
 
 [node name="CombatLog" type="RichTextLabel" parent="."]
 layout_mode = 0
-offset_left = 476.0
+offset_left = 542.0
 offset_top = 324.0
-offset_right = 1102.0
+offset_right = 1056.0
 offset_bottom = 521.0
 theme_override_styles/normal = SubResource("StyleBoxFlat_o70s7")
 bbcode_enabled = true
