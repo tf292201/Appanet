@@ -25,6 +25,7 @@ namespace Appanet.Scripts.Tests
 		private CombatParticipant _pendingAttackTarget;  
 		private float _currentAttackMultiplier = 1.0f;   
 		private Button _defendBtn; 
+		private Button _specialBtn; 
 		
 		public override void _Ready()
 		{
@@ -36,6 +37,7 @@ namespace Appanet.Scripts.Tests
 			_attackBtn = GetNode<Button>("../ActionButtons/AttackBtn");
 			_itemBtn = GetNode<Button>("../ActionButtons/ItemBtn");
 			_defendBtn = GetNode<Button>("../ActionButtons/DefendBtn"); 
+			_specialBtn = GetNode<Button>("../ActionButtons/SpecialBtn");
 			_targetSelection = GetNode<VBoxContainer>("../TargetSelection");
 			
 			// Create turn indicator label
@@ -48,6 +50,8 @@ namespace Appanet.Scripts.Tests
 			_attackBtn.Pressed += OnAttackButtonPressed;
 			_itemBtn.Pressed += OnItemButtonPressed;
 			_defendBtn.Pressed += OnDefendButtonPressed; 
+			_specialBtn.Pressed += OnSpecialButtonPressed; 
+			
 			
 			InitializeCombat();
 		}
@@ -114,7 +118,6 @@ private void InitializeCombat()
 {
 	_currentActorSelecting = _combat.GetNextActorNeedingAction();
 	
-	
 	if (_currentActorSelecting == null)
 	{
 		HidePlayerActions();
@@ -139,6 +142,9 @@ private void InitializeCombat()
 		{
 			_itemBtn.Disabled = true;
 		}
+		
+		// NEW - Enable/disable special button based on meter
+		_specialBtn.Disabled = !_currentActorSelecting.Character.CanUseSpecial();
 	}
 }
 		
@@ -457,8 +463,8 @@ private void OnHealTargetSelected(CombatParticipant target)
 		
 		private void UpdateUI()
 		{
-			UpdateTeamDisplay(_playerTeamUI, _combat.GetAliveAllies(), true);
-			UpdateTeamDisplay(_enemyTeamUI, _combat.GetAliveEnemies(), false);
+ 		   UpdateTeamDisplay(_playerTeamUI, _combat.PlayerTeam, true);  // ← Changed to PlayerTeam (all members)
+ 		   UpdateTeamDisplay(_enemyTeamUI, _combat.EnemyTeam, false);   // ← Changed to EnemyTeam (all enemies)
 		}
 		
 private void UpdateTeamDisplay(VBoxContainer container, List<CombatParticipant> team, bool isPlayerTeam)
@@ -643,15 +649,15 @@ else if (member.Character is Ally)
 			_combatLog.GetVScrollBar().Value = _combatLog.GetVScrollBar().MaxValue;
 		}
 		
-		private void OnDefendButtonPressed()
-		{
+private void OnDefendButtonPressed()
+{
 	// Execute defend action immediately
-		bool actionExecuted = _combat.ExecuteDefendImmediately(_currentActorSelecting);
-	
-		if (!actionExecuted)
-		{
-			return;
-		}
+	bool actionExecuted = _combat.ExecuteDefendImmediately(_currentActorSelecting);
+
+	if (!actionExecuted)
+	{
+		return;
+	}
 	
 	// Update UI to show defending status
 	UpdateUI();
@@ -674,8 +680,79 @@ else if (member.Character is Ally)
 		// Continue to next actor
 		PromptNextAction();
 	}
+} 
+
+private void OnSpecialButtonPressed()  // ← Now it's a separate method
+{
+	// Check if character can use special
+	if (!_currentActorSelecting.Character.CanUseSpecial())
+	{
+		Log("⚠️ Not enough Special Power!");
+		return;
+	}
+	
+	// If character has multiple abilities, show selection menu
+	// For now, they only have 1, so execute directly
+	var ability = _currentActorSelecting.Character.SelectedAbility;
+	
+	if (ability == null)
+	{
+		Log("⚠️ No special ability equipped!");
+		return;
+	}
+	
+	// Different execution based on target type
+	switch (ability.TargetType)
+	{
+		case Appanet.Scripts.Models.SpecialAbilities.TargetType.Self:
+		case Appanet.Scripts.Models.SpecialAbilities.TargetType.AllAllies:
+		case Appanet.Scripts.Models.SpecialAbilities.TargetType.AllEnemies:
+			// Execute immediately (no target selection needed)
+			ExecuteSpecialAbility(ability);
+			break;
+			
+		case Appanet.Scripts.Models.SpecialAbilities.TargetType.SingleAlly:
+			// Show ally selection (implement later if needed)
+			break;
+			
+		case Appanet.Scripts.Models.SpecialAbilities.TargetType.SingleEnemy:
+			// Show enemy selection (implement later if needed)
+			break;
+	}
 }
-		
+
+private void ExecuteSpecialAbility(Appanet.Scripts.Models.SpecialAbilities.SpecialAbility ability)
+{
+	// Execute the ability
+	bool actionExecuted = _combat.ExecuteSpecialAbilityImmediately(_currentActorSelecting, ability);
+	
+	if (!actionExecuted)
+	{
+		return;
+	}
+	
+	// Update UI
+	UpdateUI();
+	
+	// Check if combat is over
+	if (_combat.IsCombatOver)
+	{
+		return;
+	}
+	
+	// Check if all players have acted
+	if (_combat.AllPlayersHaveActed())
+	{
+		// All players acted, start enemy turn
+		HidePlayerActions();
+		_combat.StartEnemyTurn();
+	}
+	else
+	{
+		// Continue to next actor
+		PromptNextAction();
+	}
+} 
 		
 		private void OnAttackButtonPressed()
 		{

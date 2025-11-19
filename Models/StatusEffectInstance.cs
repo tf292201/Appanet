@@ -36,6 +36,7 @@ namespace Appanet.Scripts.Models
 				StatusEffect.Possessed => $"Possessed ({Duration} turns left)",
 				StatusEffect.Blessed => $"Blessed (+{Potency}% stats, {Duration} turns left)",
 				StatusEffect.Defending => $"Defending (+50% defense, {Duration} turns left)",
+				StatusEffect.DefenseBoost => $"Defense Boost (+{Potency}% defense, {Duration} turns left)", 
 				_ => "None"
 			};
 		}

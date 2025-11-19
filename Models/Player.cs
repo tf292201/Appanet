@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
+using Appanet.Scripts.Models.SpecialAbilities;
+
 namespace Appanet.Scripts.Models
 {
 	public class Player : Character
@@ -24,6 +26,8 @@ namespace Appanet.Scripts.Models
 			EquippedWeapon = null;
 			EquippedArmor = null;
 			Money = 50;
+			
+			UnlockAbility(new StreetLightsComingOn());
 		}
 		
 		// Money management methods

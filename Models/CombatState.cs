@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
+using Appanet.Scripts.Models.SpecialAbilities;
 namespace Appanet.Scripts.Models
 {
 	
@@ -70,18 +71,29 @@ namespace Appanet.Scripts.Models
 		
 		// Initialize combat
 		public void StartCombat()
-		{
-			CurrentPhase = TurnPhase.PlayerTeamActing;
-			RoundNumber = 1;
-			IsCombatOver = false;
-			
-			Log("=== COMBAT START ===");
-			Log($"Player Team: {PlayerTeam.Count} members");
-			Log($"Enemy Team: {EnemyTeam.Count} enemies");
-			Log("");
-			
-			StartPlayerTurn();
-		}
+{
+	CurrentPhase = TurnPhase.PlayerTeamActing;
+	RoundNumber = 1;
+	IsCombatOver = false;
+	
+	// NEW - Reset all special meters to 0
+	foreach (var member in PlayerTeam)
+	{
+		member.Character.ResetSpecialMeter();
+	}
+	
+	foreach (var enemy in EnemyTeam)
+	{
+		enemy.Character.ResetSpecialMeter();
+	}
+	
+	Log("=== COMBAT START ===");
+	Log($"Player Team: {PlayerTeam.Count} members");
+	Log($"Enemy Team: {EnemyTeam.Count} enemies");
+	Log("");
+	
+	StartPlayerTurn();
+}
 		
 		private void StartPlayerTurn()
 {
@@ -104,8 +116,8 @@ namespace Appanet.Scripts.Models
 	OnPhaseChange?.Invoke(CurrentPhase);
 }
 		
-		public bool ExecuteAttackImmediately(CombatParticipant attacker, CombatParticipant target, float damageMultiplier = 1.0f)
-{
+	public bool ExecuteAttackImmediately(CombatParticipant attacker, CombatParticipant target, float damageMultiplier = 1.0f)
+	{
 	if (IsCombatOver) return false;
 	
 	if (target == null || !target.IsAlive)
@@ -119,6 +131,7 @@ namespace Appanet.Scripts.Models
 	{
 		_actorsWhoActedThisTurn.Add(attacker);
 	}
+	attacker.Character.AddSpecialMeter(25);
 	
 	// Get attack result with all details
 	AttackResult attackResult = attacker.Character.AttackWithResult();
@@ -142,6 +155,11 @@ namespace Appanet.Scripts.Models
 		modifiedDamage,
 		attackResult.DamageType
 	);
+	
+	if (!damageResult.WasDodged && target.IsAlive)
+	{
+	target.Character.AddSpecialMeter(15);
+	}
 	
 	// Build combat log message
 	if (damageResult.WasDodged)
@@ -191,6 +209,8 @@ public bool ExecuteUseItemImmediately(CombatParticipant actor, string itemName, 
 	{
 		_actorsWhoActedThisTurn.Add(actor);
 	}
+	
+	actor.Character.AddSpecialMeter(25);
 	
 	if (target == null)
 		target = actor;
@@ -248,6 +268,45 @@ public bool ExecuteUseItemImmediately(CombatParticipant actor, string itemName, 
 	return true;
 }
 
+public bool ExecuteSpecialAbilityImmediately(CombatParticipant actor, SpecialAbility ability)
+{
+	if (IsCombatOver) return false;
+	
+	// Check if can use
+	if (!actor.Character.CanUseSpecial())
+	{
+		Log($"⚠️ {actor.GetDisplayName()} doesn't have enough Special Power!");
+		return false;
+	}
+	
+	// Mark this actor as having acted
+	if (!_actorsWhoActedThisTurn.Contains(actor))
+	{
+		_actorsWhoActedThisTurn.Add(actor);
+	}
+	
+	// Execute the ability
+	// For abilities that target all, we pass the appropriate list
+	List<CombatParticipant> targets = ability.TargetType switch
+	{
+		TargetType.AllAllies => GetAliveAllies(),
+		TargetType.AllEnemies => GetAliveEnemies(),
+		_ => new List<CombatParticipant>()
+	};
+	
+	ability.Execute(actor, targets, this);
+	
+	// Spend the special meter
+	actor.Character.UseSpecial();
+	
+	// Check if combat ended
+	CheckCombatEnd();
+	
+	return true;
+}
+
+
+
 public bool AllPlayersHaveActed()
 {
 	return _actorsWhoActedThisTurn.Count >= PlayerTeam.Count(p => p.IsAlive);
@@ -277,7 +336,25 @@ public void StartEnemyTurn()
 		aliveAllies = PlayerTeam.Where(p => p.IsAlive).ToList();
 		if (aliveAllies.Count == 0) break;
 		
-		var target = aliveAllies[GD.RandRange(0, aliveAllies.Count - 1)];
+		// NEW - Check if enemy is confused
+		CombatParticipant target;
+		bool isConfused = enemy.Character.HasStatusEffect(StatusEffect.Confused);
+		
+		if (isConfused)
+		{
+			// Confused enemies attack random targets (including other enemies!)
+			var allPossibleTargets = new List<CombatParticipant>();
+			allPossibleTargets.AddRange(aliveAllies);
+			allPossibleTargets.AddRange(EnemyTeam.Where(e => e.IsAlive && e != enemy)); // Other enemies
+			
+			target = allPossibleTargets[GD.RandRange(0, allPossibleTargets.Count - 1)];
+			Log($"🌀 {enemy.GetDisplayName()} is CONFUSED!");
+		}
+		else
+		{
+			// Normal behavior - attack player team
+			target = aliveAllies[GD.RandRange(0, aliveAllies.Count - 1)];
+		}
 		
 		AttackResult attackResult = enemy.Character.AttackWithResult();
 		
@@ -285,6 +362,12 @@ public void StartEnemyTurn()
 			attackResult.Damage,
 			attackResult.DamageType
 		);
+		
+		// Gain meter for taking damage
+		if (!damageResult.WasDodged && target.IsAlive)
+		{
+			target.Character.AddSpecialMeter(15);
+		}
 		
 		if (damageResult.WasDodged)
 		{
@@ -297,7 +380,7 @@ public void StartEnemyTurn()
 				? $" ({attackResult.DamageType})" 
 				: "";
 			
-			Log($"💥 {enemy.GetDisplayName()} attacks for {damageResult.DamageTaken} damage{damageTypeText}{critText}! " +
+			Log($"💥 {enemy.GetDisplayName()} attacks {target.GetDisplayName()} for {damageResult.DamageTaken} damage{damageTypeText}{critText}! " +
 				$"[{target.Character.Health}/{target.Character.MaxHealth} HP remaining]");
 			
 			if (!target.IsAlive)
@@ -328,6 +411,7 @@ public bool ExecuteDefendImmediately(CombatParticipant defender)
 	{
 		_actorsWhoActedThisTurn.Add(defender);
 	}
+	defender.Character.AddSpecialMeter(25);
 	
 	// Apply Defending status effect (lasts 1 turn, defense boost handled by GetEffectiveDefense)
 	defender.Character.ApplyStatusEffect(StatusEffect.Defending, 1);
@@ -549,6 +633,11 @@ private void ExecuteEnemyTurn()
 			attackResult.DamageType
 		);
 		
+		if (!damageResult.WasDodged && target.IsAlive)
+	{
+		target.Character.AddSpecialMeter(15);
+	}
+		
 		// Log result
 		if (damageResult.WasDodged)
 		{
@@ -640,7 +729,7 @@ private void ExecuteEnemyTurn()
 	}
 }
 		
-		private void Log(string message)
+		public void Log(string message)
 		{
 			OnCombatLog?.Invoke(message);
 			GD.Print(message);

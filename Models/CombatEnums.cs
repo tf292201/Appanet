@@ -49,6 +49,7 @@ namespace Appanet.Scripts.Models
 		Cursed,        // Stat penalties
 		Possessed,     // Lose control
 		Blessed,       // Stat bonuses
-		Defending      // Increased defense temporarily
+		Defending,      // Increased defense temporarily
+		DefenseBoost 
 	}
 }

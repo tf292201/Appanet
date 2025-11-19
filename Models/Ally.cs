@@ -1,7 +1,7 @@
 
 using System;
 using Godot;
-
+using Appanet.Scripts.Models.SpecialAbilities;
 namespace Appanet.Scripts.Models
 {
 	public class Ally : Character
@@ -64,6 +64,9 @@ namespace Appanet.Scripts.Models
 				12,
 				4
 			);
+			
+			michael.UnlockAbility(new MKUltraMemoryScramble());
+			
 			return michael;
 		}
 		
@@ -89,6 +92,9 @@ namespace Appanet.Scripts.Models
 				3
 			);
 			case_ally.DodgeChance = 0.15f;
+			
+			case_ally.UnlockAbility(new HaintWind());
+			
 			return case_ally;
 		}
 		

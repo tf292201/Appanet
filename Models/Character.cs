@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using Appanet.Scripts.Models.SpecialAbilities;
 
 namespace Appanet.Scripts.Models
 {
@@ -38,6 +39,11 @@ namespace Appanet.Scripts.Models
 		public List<StatusEffectInstance> ActiveStatusEffects { get; protected set; }
 		public float DodgeChance { get; protected set; }  // 0.0 to 1.0 (0% to 100%)
 		
+		public List<SpecialAbility> UnlockedAbilities { get; protected set; }
+   		 public SpecialAbility SelectedAbility { get; protected set; }
+ 	  public int SpecialMeter { get; protected set; }
+ 	   public int MaxSpecialMeter { get; protected set; }
+		
 		// Constructor
 		protected Character(string name, int maxHealth, int attackPower, int defense)
 		{
@@ -51,6 +57,11 @@ namespace Appanet.Scripts.Models
 			Resistances = new DamageResistance();
 			ActiveStatusEffects = new List<StatusEffectInstance>();
 			DodgeChance = 0f;
+			
+			UnlockedAbilities = new List<SpecialAbility>();
+	   		SelectedAbility = null;
+	   		SpecialMeter = 0;
+	   		MaxSpecialMeter = 100;
 		}
 		
 		// In Character.cs - add this property
@@ -229,28 +240,35 @@ namespace Appanet.Scripts.Models
 		}
 		
 		public int GetEffectiveDefense()
-		{
-			int defense = Defense;
-			
-			if (HasStatusEffect(StatusEffect.Cursed))
-			{
-				var curse = GetStatusEffect(StatusEffect.Cursed);
-				defense = defense * (100 - curse!.Potency) / 100;
-			}
-			
-			if (HasStatusEffect(StatusEffect.Blessed))
-			{
-				var blessing = GetStatusEffect(StatusEffect.Blessed);
-				defense = defense * (100 + blessing!.Potency) / 100;
-			}
-			
-			if (HasStatusEffect(StatusEffect.Defending))
-			{
-				defense = (int)(defense * 1.5f);
-			}
-			
-			return defense;
-		}
+{
+	int defense = Defense;
+	
+	if (HasStatusEffect(StatusEffect.Cursed))
+	{
+		var curse = GetStatusEffect(StatusEffect.Cursed);
+		defense = defense * (100 - curse!.Potency) / 100;
+	}
+	
+	if (HasStatusEffect(StatusEffect.Blessed))
+	{
+		var blessing = GetStatusEffect(StatusEffect.Blessed);
+		defense = defense * (100 + blessing!.Potency) / 100;
+	}
+	
+	if (HasStatusEffect(StatusEffect.Defending))
+	{
+		defense = (int)(defense * 1.5f);
+	}
+	
+	// NEW - Handle DefenseBoost from Street Lights Coming On
+	if (HasStatusEffect(StatusEffect.DefenseBoost))
+	{
+		var boost = GetStatusEffect(StatusEffect.DefenseBoost);
+		defense = defense * (100 + boost!.Potency) / 100;
+	}
+	
+	return defense;
+}
 		
 		public void Heal(int amount)
 		{
@@ -286,5 +304,52 @@ namespace Appanet.Scripts.Models
 				}
 			}
 		}
+		
+		public void UnlockAbility(SpecialAbility ability)
+	{
+		if (!UnlockedAbilities.Contains(ability))
+		{
+			UnlockedAbilities.Add(ability);
+			
+			// Auto-select first ability
+			if (SelectedAbility == null)
+			{
+				SelectedAbility = ability;
+			}
+			
+			GD.Print($"{Name} learned {ability.Name}!");
+		}
+	}
+	
+	public void SelectAbility(int index)
+	{
+		if (index >= 0 && index < UnlockedAbilities.Count)
+		{
+			SelectedAbility = UnlockedAbilities[index];
+		}
+	}
+	
+	public void AddSpecialMeter(int amount)
+	{
+		SpecialMeter = Mathf.Min(SpecialMeter + amount, MaxSpecialMeter);
+	}
+	
+	public bool CanUseSpecial()
+	{
+		return SelectedAbility != null && SpecialMeter >= SelectedAbility.Cost;
+	}
+	
+	public void UseSpecial()
+	{
+		if (SelectedAbility != null)
+		{
+			SpecialMeter = Mathf.Max(0, SpecialMeter - SelectedAbility.Cost);
+		}
+	}
+	
+	public void ResetSpecialMeter()
+	{
+		SpecialMeter = 0;
+	}
 	}
 }
