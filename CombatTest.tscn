@@ -107,6 +107,11 @@ custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 text = "🏃 Flee"
 
+[node name="DefendBtn" type="Button" parent="ActionButtons"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "Defend"
+
 [node name="TargetSelection" type="VBoxContainer" parent="."]
 visible = false
 layout_mode = 1

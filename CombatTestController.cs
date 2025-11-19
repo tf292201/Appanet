@@ -22,8 +22,9 @@ namespace Appanet.Scripts.Tests
 		private VBoxContainer _targetSelection;
 		private Label _turnIndicator;
 		private Consumable _selectedItem;
-		private CombatParticipant _pendingAttackTarget;  // ← ADD THIS
+		private CombatParticipant _pendingAttackTarget;  
 		private float _currentAttackMultiplier = 1.0f;   
+		private Button _defendBtn; 
 		
 		public override void _Ready()
 		{
@@ -34,6 +35,7 @@ namespace Appanet.Scripts.Tests
 			_actionButtons = GetNode<HBoxContainer>("../ActionButtons");
 			_attackBtn = GetNode<Button>("../ActionButtons/AttackBtn");
 			_itemBtn = GetNode<Button>("../ActionButtons/ItemBtn");
+			_defendBtn = GetNode<Button>("../ActionButtons/DefendBtn"); 
 			_targetSelection = GetNode<VBoxContainer>("../TargetSelection");
 			
 			// Create turn indicator label
@@ -45,6 +47,7 @@ namespace Appanet.Scripts.Tests
 			// Connect button signals
 			_attackBtn.Pressed += OnAttackButtonPressed;
 			_itemBtn.Pressed += OnItemButtonPressed;
+			_defendBtn.Pressed += OnDefendButtonPressed; 
 			
 			InitializeCombat();
 		}
@@ -110,6 +113,7 @@ private void InitializeCombat()
 		private void PromptNextAction()
 {
 	_currentActorSelecting = _combat.GetNextActorNeedingAction();
+	
 	
 	if (_currentActorSelecting == null)
 	{
@@ -229,12 +233,22 @@ private void ShowHealTargetSelection()
 	_targetSelection.AddChild(title);
 	
 	// Show all alive team members as potential targets
-	var aliveAllies = _combat.GetAliveAllies();
+	var allAllies = _combat.PlayerTeam;
 	
-	foreach (var ally in aliveAllies)
+	foreach (var ally in allAllies)
+{
+	var btn = new Button();
+	
+	if (!ally.IsAlive)
 	{
-		var btn = new Button();
-		
+		// Defeated ally - can be revived
+		btn.Text = $"💀 {ally.GetDisplayName()} [DEFEATED]\n" +
+				   $"Will revive with {_selectedItem.HealAmount} HP";
+		btn.CustomMinimumSize = new Vector2(250, 70);
+	}
+	else
+	{
+		// Living ally - normal healing
 		int potentialHealing = Mathf.Min(_selectedItem.HealAmount, 
 										 ally.Character.MaxHealth - ally.Character.Health);
 		
@@ -243,21 +257,21 @@ private void ShowHealTargetSelection()
 		btn.CustomMinimumSize = new Vector2(250, 70);
 		
 		// Disable if target is at full health
-		bool canHeal = ally.Character.Health < ally.Character.MaxHealth;
-		btn.Disabled = !canHeal;
-		
-		if (canHeal)
+		if (ally.Character.Health >= ally.Character.MaxHealth)
 		{
-			var targetAlly = ally;
-			btn.Pressed += () => OnHealTargetSelected(targetAlly);
-		}
-		else
-		{
+			btn.Disabled = true;
 			btn.Text += "\n(Full HP)";
 		}
-		
-		_targetSelection.AddChild(btn);
 	}
+	
+	if (!btn.Disabled)
+	{
+		var targetAlly = ally;
+		btn.Pressed += () => OnHealTargetSelected(targetAlly);
+	}
+	
+	_targetSelection.AddChild(btn);
+}
 	
 	// Add separator
 	var separator = new HSeparator();
@@ -381,18 +395,42 @@ private void OnHealTargetSelected(CombatParticipant target)
 	
 	if (player != null && _selectedItem != null)
 	{
-		// Remove the item from inventory NOW (when queuing, not when executing)
+		// Remove the item from inventory NOW
 		player.Inventory.RemoveItem(_selectedItem);
 		
-		// Queue the action with the item name
-		_combat.QueueAction(_currentActorSelecting, target, "UseItem", _selectedItem.Name);
+		// Execute healing immediately
+		bool actionExecuted = _combat.ExecuteUseItemImmediately(_currentActorSelecting, _selectedItem.Name, target);
 		
-		Log($"[Reserved] {_currentActorSelecting.GetDisplayName()} will use {_selectedItem.Name} on {target.GetDisplayName()}");
+		if (!actionExecuted)
+		{
+			return;
+		}
 	}
 	
 	_targetSelection.Visible = false;
 	_selectedItem = null;
-	PromptNextAction();
+	
+	// Update UI to show healing
+	UpdateUI();
+	
+	// Check if combat is over
+	if (_combat.IsCombatOver)
+	{
+		return;
+	}
+	
+	// Check if all players have acted
+	if (_combat.AllPlayersHaveActed())
+	{
+		// All players acted, start enemy turn
+		HidePlayerActions();
+		_combat.StartEnemyTurn();
+	}
+	else
+	{
+		// Continue to next actor
+		PromptNextAction();
+	}
 }
 		
 		private void OnCombatEnd(Team winner)
@@ -430,16 +468,36 @@ private void UpdateTeamDisplay(VBoxContainer container, List<CombatParticipant> 
 		child.QueueFree();
 	}
 	
+	// Show ALL team members (alive and defeated)
 	foreach (var member in team)
 	{
 		var panel = new PanelContainer();
 		var vbox = new VBoxContainer();
 		
+		// Add defeated indicator if not alive
+		if (!member.IsAlive)
+		{
+			var defeatedLabel = new Label();
+			defeatedLabel.Text = "💀 DEFEATED";
+			defeatedLabel.AddThemeFontSizeOverride("font_size", 12);
+			defeatedLabel.AddThemeColorOverride("font_color", new Color(0.8f, 0.2f, 0.2f));
+			vbox.AddChild(defeatedLabel);
+		}
+		
 		// Name label
 		var nameLabel = new Label();
 		nameLabel.Text = member.GetDisplayName();
-		nameLabel.AddThemeColorOverride("font_color", 
-			isPlayerTeam ? new Color(0.5f, 1f, 0.5f) : new Color(1f, 0.5f, 0.5f));
+		
+		// Gray out name if defeated, otherwise use team color
+		if (!member.IsAlive)
+		{
+			nameLabel.AddThemeColorOverride("font_color", new Color(0.5f, 0.5f, 0.5f));
+		}
+		else
+		{
+			nameLabel.AddThemeColorOverride("font_color", 
+				isPlayerTeam ? new Color(0.5f, 1f, 0.5f) : new Color(1f, 0.5f, 0.5f));
+		}
 		vbox.AddChild(nameLabel);
 		
 		// HP label
@@ -448,44 +506,55 @@ private void UpdateTeamDisplay(VBoxContainer container, List<CombatParticipant> 
 		Color hpColor = hpPercent > 0.5f ? new Color(0, 1, 0) : 
 					   hpPercent > 0.25f ? new Color(1, 1, 0) : 
 					   new Color(1, 0, 0);
+		
+		// Gray out HP if defeated
+		if (!member.IsAlive)
+		{
+			hpColor = new Color(0.5f, 0.5f, 0.5f);
+		}
+		
 		hpLabel.Text = $"HP: {member.Character.Health}/{member.Character.MaxHealth}";
 		hpLabel.AddThemeColorOverride("font_color", hpColor);
 		vbox.AddChild(hpLabel);
 		
 		// Get equipment info
-		int baseAtk = member.Character.AttackPower;
-		int baseDef = member.Character.Defense;
-		int weaponBonus = 0;
-		int armorBonus = 0;
-		string weaponName = "";
-		string armorName = "";
-		
-		if (member.Character is Player player)
-		{
-			if (player.EquippedWeapon != null)
-			{
-				weaponBonus = player.EquippedWeapon.AttackBonus;
-				weaponName = player.EquippedWeapon.Name;
-			}
-			if (player.EquippedArmor != null)
-			{
-				armorBonus = player.EquippedArmor.DefenseBonus;
-				armorName = player.EquippedArmor.Name;
-			}
-		}
-		else if (member.Character is Ally ally)
-		{
-			if (ally.EquippedWeapon != null)
-			{
-				weaponBonus = ally.EquippedWeapon.AttackBonus;
-				weaponName = ally.EquippedWeapon.Name;
-			}
-			if (ally.EquippedArmor != null)
-			{
-				armorBonus = ally.EquippedArmor.DefenseBonus;
-				armorName = ally.EquippedArmor.Name;
-			}
-		}
+		// Get equipment info
+int baseAtk = member.Character.AttackPower;
+int baseDef = member.Character.Defense;
+int weaponBonus = 0;
+int armorBonus = 0;
+string weaponName = "";
+string armorName = "";
+
+// Check if this is a Player
+if (member.Character is Player)
+{
+	Player player = (Player)member.Character;
+	if (player.EquippedWeapon != null)
+	{
+		weaponBonus = player.EquippedWeapon.AttackBonus;
+		weaponName = player.EquippedWeapon.Name;
+	}
+	if (player.EquippedArmor != null)
+	{
+		armorBonus = player.EquippedArmor.DefenseBonus;
+		armorName = player.EquippedArmor.Name;
+	}
+}
+else if (member.Character is Ally)
+{
+	Ally ally = (Ally)member.Character;
+	if (ally.EquippedWeapon != null)
+	{
+		weaponBonus = ally.EquippedWeapon.AttackBonus;
+		weaponName = ally.EquippedWeapon.Name;
+	}
+	if (ally.EquippedArmor != null)
+	{
+		armorBonus = ally.EquippedArmor.DefenseBonus;
+		armorName = ally.EquippedArmor.Name;
+	}
+}
 		
 		// Stats label with dynamic attack and defense
 		var statsLabel = new Label();
@@ -498,6 +567,13 @@ private void UpdateTeamDisplay(VBoxContainer container, List<CombatParticipant> 
 		
 		statsLabel.Text = $"{atkText} | {defText}";
 		statsLabel.AddThemeFontSizeOverride("font_size", 12);
+		
+		// Gray out stats if defeated
+		if (!member.IsAlive)
+		{
+			statsLabel.AddThemeColorOverride("font_color", new Color(0.5f, 0.5f, 0.5f));
+		}
+		
 		vbox.AddChild(statsLabel);
 		
 		// Weapon label (if equipped)
@@ -506,7 +582,8 @@ private void UpdateTeamDisplay(VBoxContainer container, List<CombatParticipant> 
 			var weaponLabel = new Label();
 			weaponLabel.Text = $"⚔️ {weaponName}";
 			weaponLabel.AddThemeFontSizeOverride("font_size", 10);
-			weaponLabel.AddThemeColorOverride("font_color", new Color(0.8f, 0.8f, 0.5f));
+			weaponLabel.AddThemeColorOverride("font_color", 
+				member.IsAlive ? new Color(0.8f, 0.8f, 0.5f) : new Color(0.5f, 0.5f, 0.5f));
 			vbox.AddChild(weaponLabel);
 		}
 		
@@ -516,14 +593,31 @@ private void UpdateTeamDisplay(VBoxContainer container, List<CombatParticipant> 
 			var armorLabel = new Label();
 			armorLabel.Text = $"🛡️ {armorName}";
 			armorLabel.AddThemeFontSizeOverride("font_size", 10);
-			armorLabel.AddThemeColorOverride("font_color", new Color(0.5f, 0.7f, 0.9f));
+			armorLabel.AddThemeColorOverride("font_color", 
+				member.IsAlive ? new Color(0.5f, 0.7f, 0.9f) : new Color(0.5f, 0.5f, 0.5f));
 			vbox.AddChild(armorLabel);
 		}
 		
-		// Highlight if this actor is selecting
-		if (member == _currentActorSelecting)
+		// Show defending status (only if alive)
+		if (member.IsAlive && member.Character.HasStatusEffect(StatusEffect.Defending))
+		{
+			var defendingLabel = new Label();
+			defendingLabel.Text = "🛡️ DEFENDING";
+			defendingLabel.AddThemeFontSizeOverride("font_size", 10);
+			defendingLabel.AddThemeColorOverride("font_color", new Color(0.5f, 0.8f, 1f));
+			vbox.AddChild(defendingLabel);
+		}
+		
+		// Highlight if this actor is selecting (only if alive)
+		if (member == _currentActorSelecting && member.IsAlive)
 		{
 			panel.AddThemeStyleboxOverride("panel", CreateHighlightStyle());
+		}
+		
+		// Dim the entire panel if defeated
+		if (!member.IsAlive)
+		{
+			panel.Modulate = new Color(0.6f, 0.6f, 0.6f, 0.8f);
 		}
 		
 		panel.AddChild(vbox);
@@ -548,6 +642,39 @@ private void UpdateTeamDisplay(VBoxContainer container, List<CombatParticipant> 
 			_combatLog.AppendText(message + "\n");
 			_combatLog.GetVScrollBar().Value = _combatLog.GetVScrollBar().MaxValue;
 		}
+		
+		private void OnDefendButtonPressed()
+		{
+	// Execute defend action immediately
+		bool actionExecuted = _combat.ExecuteDefendImmediately(_currentActorSelecting);
+	
+		if (!actionExecuted)
+		{
+			return;
+		}
+	
+	// Update UI to show defending status
+	UpdateUI();
+	
+	// Check if combat is over (shouldn't happen from defending)
+	if (_combat.IsCombatOver)
+	{
+		return;
+	}
+	
+	// Check if all players have acted
+	if (_combat.AllPlayersHaveActed())
+	{
+		// All players acted, start enemy turn
+		HidePlayerActions();
+		_combat.StartEnemyTurn();
+	}
+	else
+	{
+		// Continue to next actor
+		PromptNextAction();
+	}
+}
 		
 		
 		private void OnAttackButtonPressed()
@@ -583,15 +710,36 @@ private void OnTimingComplete(float multiplier)
 	
 	Log($"{feedback} (x{multiplier:F1} damage)");
 	
-	// Queue the attack with the multiplier
-	_combat.QueueAction(_currentActorSelecting, _pendingAttackTarget, "Attack");
+	// Execute attack immediately
+	bool actionExecuted = _combat.ExecuteAttackImmediately(_currentActorSelecting, _pendingAttackTarget, multiplier);
 	
-	// Store the multiplier for this specific action
-	_currentAttackMultiplier = multiplier;
+	if (!actionExecuted)
+	{
+		// Combat ended or target invalid
+		return;
+	}
 	
-	// Continue to next actor
+	// Update UI to show damage
 	UpdateUI();
-	PromptNextAction();
+	
+	// Check if combat is over
+	if (_combat.IsCombatOver)
+	{
+		return; // Combat end handler will take over
+	}
+	
+	// Check if all players have acted
+	if (_combat.AllPlayersHaveActed())
+	{
+		// All players acted, start enemy turn
+		HidePlayerActions();
+		_combat.StartEnemyTurn();
+	}
+	else
+	{
+		// Continue to next actor
+		PromptNextAction();
+	}
 }
 		
 		
