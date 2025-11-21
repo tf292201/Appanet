@@ -26,6 +26,7 @@ namespace Appanet.Scripts.Tests
 		private float _currentAttackMultiplier = 1.0f;   
 		private Button _defendBtn; 
 		private Button _specialBtn; 
+		private Button _equipBtn;
 		
 		public override void _Ready()
 		{
@@ -39,6 +40,8 @@ namespace Appanet.Scripts.Tests
 			_defendBtn = GetNode<Button>("../ActionButtons/DefendBtn"); 
 			_specialBtn = GetNode<Button>("../ActionButtons/SpecialBtn");
 			_targetSelection = GetNode<VBoxContainer>("../TargetSelection");
+			_equipBtn = GetNode<Button>("../ActionButtons/EquipBtn");
+			
 			
 			// Create turn indicator label
 			_turnIndicator = new Label();
@@ -46,15 +49,28 @@ namespace Appanet.Scripts.Tests
 			_turnIndicator.AddThemeFontSizeOverride("font_size", 20);
 			GetNode("..").AddChild(_turnIndicator);
 			
+			
+		
+			
 			// Connect button signals
 			_attackBtn.Pressed += OnAttackButtonPressed;
 			_itemBtn.Pressed += OnItemButtonPressed;
 			_defendBtn.Pressed += OnDefendButtonPressed; 
 			_specialBtn.Pressed += OnSpecialButtonPressed; 
+			_equipBtn.Pressed += OnManageEquipmentPressed;
 			
 			
 			InitializeCombat();
 		}
+		
+private void OnManageEquipmentPressed()
+{
+	GetTree().ChangeSceneToFile("res://InventoryScene.tscn");
+	}
+		
+		
+		
+		
 		
 	// In CombatTestController.cs - InitializeCombat()
 private void InitializeCombat()
@@ -77,6 +93,7 @@ private void InitializeCombat()
 	michael.EquipWeapon(michaelWeapon);
 	michael.EquipArmor(michaelArmor);
 	_combat.AddAlly(michael, "michael");
+	GameManager.Instance.AddAllyToParty(michael);
 	
 	// Casey with weapon and armor
 	var casey = Ally.CreateCase();
@@ -87,6 +104,7 @@ private void InitializeCombat()
 	casey.EquipWeapon(caseyWeapon);
 	casey.EquipArmor(caseyArmor);
 	_combat.AddAlly(casey, "case");
+	GameManager.Instance.AddAllyToParty(casey);
 	
 	// Add enemies
 	_combat.AddEnemy(Enemy.CreateBackroadsGremmlin());

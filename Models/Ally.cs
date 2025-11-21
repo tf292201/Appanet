@@ -1,4 +1,3 @@
-
 using System;
 using Godot;
 using Appanet.Scripts.Models.SpecialAbilities;
@@ -7,17 +6,17 @@ namespace Appanet.Scripts.Models
 	public class Ally : Character
 	{
 		public string AllyID { get; private set; }
-		public Inventory Inventory { get; private set; }  // ADD THIS
-		public Weapon EquippedWeapon { get; private set; }  // ADD THIS
+		public Inventory Inventory { get; private set; }
+		public Weapon EquippedWeapon { get; private set; }
 		
 		public Ally(string id, string name, int maxHealth, int attackPower, int defense)
 			: base(name, maxHealth, attackPower, defense)
 		{
 			AllyID = id;
-			Inventory = new Inventory(10);  // ADD THIS - smaller inventory than player
+			Inventory = new Inventory(10);
 		}
 		
-		// ADD THESE METHODS
+		// EQUIPMENT METHODS
 		public void EquipWeapon(Weapon weapon)
 		{
 			if (EquippedWeapon != null)
@@ -26,7 +25,32 @@ namespace Appanet.Scripts.Models
 			}
 			
 			EquippedWeapon = weapon;
-			Inventory.RemoveItem(weapon);
+			if (weapon != null)
+			{
+				Inventory.RemoveItem(weapon);
+			}
+		}
+		
+		public void UnequipWeapon()
+		{
+			if (EquippedWeapon == null)
+			{
+				return;
+			}
+			
+			Inventory.AddItem(EquippedWeapon);
+			EquippedWeapon = null;
+		}
+		
+		public void UnequipArmor()
+		{
+			if (EquippedArmor == null)
+			{
+				return;
+			}
+			
+			Inventory.AddItem(EquippedArmor);
+			EquippedArmor = null;
 		}
 		
 		public override AttackResult AttackWithResult()
@@ -54,7 +78,7 @@ namespace Appanet.Scripts.Models
  		   return AttackWithResult().Damage;
 		}
 		
-		// Factory methods stay the same
+		// Factory methods
 		public static Ally CreateMichaelWebb()
 		{
 			var michael = new Ally(
@@ -100,13 +124,36 @@ namespace Appanet.Scripts.Models
 		
 		public override void EquipArmor(Armor armor)
 		{
-  		  if (EquippedArmor != null)
-  		  {
-   			 Inventory.AddItem(EquippedArmor);
-   		  }
-	
-  			  EquippedArmor = armor;
-  			  Inventory.RemoveItem(armor);
+			// Remove old armor bonuses
+			if (EquippedArmor != null)
+			{
+				Inventory.AddItem(EquippedArmor);
+				
+				// Remove old resistance bonuses
+				foreach (var kvp in EquippedArmor.ResistanceBonuses)
+				{
+					Resistances.AddResistance(kvp.Key, -kvp.Value);
+				}
+				
+				// Remove dodge bonus
+				DodgeChance -= EquippedArmor.DodgeBonus;
 			}
+			
+			// Equip new armor
+			EquippedArmor = armor;
+			if (armor != null)
+			{
+				Inventory.RemoveItem(armor);
+				
+				// Apply new resistance bonuses
+				foreach (var kvp in armor.ResistanceBonuses)
+				{
+					Resistances.AddResistance(kvp.Key, kvp.Value);
+				}
+				
+				// Apply dodge bonus
+				DodgeChance += armor.DodgeBonus;
+			}
+		}
 	}
 }

@@ -117,6 +117,10 @@ custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 text = "Special Attack"
 
+[node name="EquipBtn" type="Button" parent="ActionButtons"]
+layout_mode = 2
+text = "Equipment"
+
 [node name="TargetSelection" type="VBoxContainer" parent="."]
 visible = false
 layout_mode = 1

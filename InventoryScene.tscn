@@ -1,0 +1,254 @@
+[gd_scene load_steps=3 format=3 uid="uid://dkerqjxtwsokm"]
+
+[ext_resource type="Script" uid="uid://b2520kwonluru" path="res://InventorySceneController.cs" id="1_bjrb0"]
+
+[sub_resource type="SystemFont" id="SystemFont_bjrb0"]
+
+[node name="InventoryScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bjrb0")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.14901961, 0.14901961, 0.2, 1)
+
+[node name="TopBar" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 65.0
+grow_horizontal = 2
+
+[node name="Title" type="Label" parent="TopBar"]
+layout_mode = 0
+offset_left = 425.0
+offset_top = 20.0
+offset_right = 667.0
+offset_bottom = 47.0
+theme_override_fonts/font = SubResource("SystemFont_bjrb0")
+theme_override_font_sizes/font_size = 19
+text = "EQUIPMENT & INVENTORY"
+
+[node name="ExpMoneyLabel" type="Label" parent="TopBar"]
+layout_mode = 0
+offset_left = 909.0
+offset_top = 19.0
+offset_right = 1096.0
+offset_bottom = 42.0
+text = "Level 1 | XP: 0/100 | $50"
+
+[node name="BackButton" type="Button" parent="TopBar"]
+custom_minimum_size = Vector2(100, 30)
+layout_mode = 0
+offset_left = 76.0
+offset_top = 14.0
+offset_right = 176.0
+offset_bottom = 45.0
+text = "BACK"
+
+[node name="MainContainer" type="HBoxContainer" parent="."]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 66.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainContainer"]
+custom_minimum_size = Vector2(350, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CharacterPanel" type="Panel" parent="MainContainer/LeftPanel"]
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="MainContainer/LeftPanel/CharacterPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 41.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CharacterTabs" type="HBoxContainer" parent="MainContainer/LeftPanel/CharacterPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="NameLabel" type="Label" parent="MainContainer/LeftPanel/CharacterPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Character Name
+"
+autowrap_mode = 2
+
+[node name="StatsLabel" type="Label" parent="MainContainer/LeftPanel/CharacterPanel/VBox"]
+layout_mode = 2
+text = "HP: 100/100
+ATK: 10
+DEF: 3"
+
+[node name="EquipmentPanel" type="Panel" parent="MainContainer/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Title" type="Label" parent="MainContainer/LeftPanel/EquipmentPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 18
+text = "Equipped"
+horizontal_alignment = 1
+
+[node name="HBox" type="HBoxContainer" parent="MainContainer/LeftPanel/EquipmentPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="WeaponSlot" type="Panel" parent="MainContainer/LeftPanel/EquipmentPanel/HBox"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBox" type="VBoxContainer" parent="MainContainer/LeftPanel/EquipmentPanel/HBox/WeaponSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SlotTitle" type="Label" parent="MainContainer/LeftPanel/EquipmentPanel/HBox/WeaponSlot/VBox"]
+layout_mode = 2
+text = "WEAPON"
+horizontal_alignment = 1
+
+[node name="ItemLabel" type="Label" parent="MainContainer/LeftPanel/EquipmentPanel/HBox/WeaponSlot/VBox"]
+layout_mode = 2
+text = " No Weapon\\n(Click to equip)"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ArmorSlot" type="Panel" parent="MainContainer/LeftPanel/EquipmentPanel/HBox"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBox" type="VBoxContainer" parent="MainContainer/LeftPanel/EquipmentPanel/HBox/ArmorSlot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SlotTitle" type="Label" parent="MainContainer/LeftPanel/EquipmentPanel/HBox/ArmorSlot/VBox"]
+layout_mode = 2
+text = "Armor"
+horizontal_alignment = 1
+
+[node name="ItemLabel" type="Label" parent="MainContainer/LeftPanel/EquipmentPanel/HBox/ArmorSlot/VBox"]
+layout_mode = 2
+text = " No Armor\\n(Click to equip)"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="InventoryPanel" type="Panel" parent="MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="MainContainer/InventoryPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 18
+text = "AVAILABLE EQUIPMENT"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainContainer/InventoryPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 34.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InventoryGrid" type="GridContainer" parent="MainContainer/InventoryPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 3
+
+[node name="ItemDetailsPanel" type="Panel" parent="MainContainer"]
+custom_minimum_size = Vector2(350, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="MainContainer/ItemDetailsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="MainContainer/ItemDetailsPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "ITEM DETAILS"
+horizontal_alignment = 1
+
+[node name="DetailsLabel" type="Label" parent="MainContainer/ItemDetailsPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Select an item to view details"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ButtonBox" type="HBoxContainer" parent="MainContainer/ItemDetailsPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EquipButton" type="Button" parent="MainContainer/ItemDetailsPanel/VBox/ButtonBox"]
+custom_minimum_size = Vector2(150, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+disabled = true
+text = "EQUIP"
+
+[node name="UnequipButton" type="Button" parent="MainContainer/ItemDetailsPanel/VBox/ButtonBox"]
+visible = false
+custom_minimum_size = Vector2(150, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+disabled = true
+text = "REMOVE"
