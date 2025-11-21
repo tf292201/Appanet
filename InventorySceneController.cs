@@ -27,6 +27,7 @@ namespace Appanet.Scripts.UI
 		private Button _equipButton;
 		private Button _unequipButton;
 		private HBoxContainer _characterTabs;
+		private Label _abilitiesLabel;
 		
 		// State
 		private Item _selectedItem;
@@ -51,6 +52,8 @@ namespace Appanet.Scripts.UI
 		_itemDetailsLabel = GetNode<Label>("MainContainer/ItemDetailsPanel/VBox/DetailsLabel");
 		_equipButton = GetNode<Button>("MainContainer/ItemDetailsPanel/VBox/ButtonBox/EquipButton");
 		_unequipButton = GetNode<Button>("MainContainer/ItemDetailsPanel/VBox/ButtonBox/UnequipButton");
+		_abilitiesLabel = GetNode<Label>("MainContainer/LeftPanel/AbilitiesPanel/VBox/AbilitiesLabel");  
+		
 		
 		_characterTabs = GetNode<HBoxContainer>("MainContainer/LeftPanel/CharacterPanel/VBox/CharacterTabs");
 		GD.Print($"✓ All UI nodes found! Tabs has {_characterTabs.GetChildCount()} children");
@@ -163,16 +166,34 @@ namespace Appanet.Scripts.UI
 		int index = i;
 		var tabButton = new Button();
 		tabButton.Text = _partyMembers[i].Name;
-		tabButton.CustomMinimumSize = new Vector2(100, 40);
+		
+		// Lock the button size to prevent expansion
+		tabButton.CustomMinimumSize = new Vector2(110, 40);
+		tabButton.Size = new Vector2(110, 40);
+		
+		// Clip text that doesn't fit
+		tabButton.ClipText = true;
+		tabButton.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
+		
+		// Prevent button from expanding
+		tabButton.SizeFlagsHorizontal = Control.SizeFlags.ShrinkBegin;
+		
+		// Load custom font
+		var customFont = GD.Load<Font>("res://fonts/RETROTECH.ttf");
+		if (customFont != null)
+		{
+			tabButton.AddThemeFontOverride("font", customFont);
+			tabButton.AddThemeFontSizeOverride("font_size", 16);  // Reduced from 20 to fit better
+		}
+		
 		tabButton.Pressed += () => SwitchCharacter(index);
 		_characterTabs.AddChild(tabButton);
 		GD.Print($"  Created tab for: {_partyMembers[i].Name} (Total tabs now: {_characterTabs.GetChildCount()})");
 	}
 	
 	UpdateTabHighlight();
-	GD.Print($"--- InitializeParty() COMPLETE --- (Tabs now has {_characterTabs.GetChildCount()} children)");
-}
-		
+	GD.Print("--- InitializeParty() COMPLETE ---");
+}	
 		private void SwitchCharacter(int index)
 		{
 			if (index < 0 || index >= _partyMembers.Count) return;
@@ -216,41 +237,68 @@ namespace Appanet.Scripts.UI
 		}
 		
 		private void UpdateCharacterDisplay()
-		{
-			_characterNameLabel.Text = _currentCharacter.Name;
-			
-			// Get current stats
-			int baseAtk = _currentCharacter.AttackPower;
-			int baseDef = _currentCharacter.Defense;
-			int weaponBonus = 0;
-			int armorBonus = 0;
-			
-			if (_currentCharacter is Player player)
-			{
-				weaponBonus = player.EquippedWeapon?.AttackBonus ?? 0;
-				armorBonus = player.EquippedArmor?.DefenseBonus ?? 0;
-			}
-			else if (_currentCharacter is Ally ally)
-			{
-				weaponBonus = ally.EquippedWeapon?.AttackBonus ?? 0;
-				armorBonus = ally.EquippedArmor?.DefenseBonus ?? 0;
-			}
-			
-			int totalAtk = baseAtk + weaponBonus;
-			int totalDef = baseDef + armorBonus;
-			
-			_characterStatsLabel.Text = $"HP: {_currentCharacter.Health}/{_currentCharacter.MaxHealth}\n";
-			
-			if (weaponBonus > 0)
-				_characterStatsLabel.Text += $"ATK: {baseAtk} + {weaponBonus} = {totalAtk}\n";
-			else
-				_characterStatsLabel.Text += $"ATK: {baseAtk}\n";
-				
-			if (armorBonus > 0)
-				_characterStatsLabel.Text += $"DEF: {baseDef} + {armorBonus} = {totalDef}";
-			else
-				_characterStatsLabel.Text += $"DEF: {baseDef}";
-		}
+{
+	_characterNameLabel.Text = _currentCharacter.Name;
+	
+	// Get current stats
+	int baseAtk = _currentCharacter.AttackPower;
+	int baseDef = _currentCharacter.Defense;
+	int weaponBonus = 0;
+	int armorBonus = 0;
+	
+	if (_currentCharacter is Player player)
+	{
+		weaponBonus = player.EquippedWeapon?.AttackBonus ?? 0;
+		armorBonus = player.EquippedArmor?.DefenseBonus ?? 0;
+	}
+	else if (_currentCharacter is Ally ally)
+	{
+		weaponBonus = ally.EquippedWeapon?.AttackBonus ?? 0;
+		armorBonus = ally.EquippedArmor?.DefenseBonus ?? 0;
+	}
+	
+	int totalAtk = baseAtk + weaponBonus;
+	int totalDef = baseDef + armorBonus;
+	
+	_characterStatsLabel.Text = $"HP: {_currentCharacter.Health}/{_currentCharacter.MaxHealth}\n";
+	
+	if (weaponBonus > 0)
+		_characterStatsLabel.Text += $"ATK: {baseAtk} + {weaponBonus} = {totalAtk}\n";
+	else
+		_characterStatsLabel.Text += $"ATK: {baseAtk}\n";
+		
+	if (armorBonus > 0)
+		_characterStatsLabel.Text += $"DEF: {baseDef} + {armorBonus} = {totalDef}";
+	else
+		_characterStatsLabel.Text += $"DEF: {baseDef}";
+	
+	// Update abilities in separate panel
+	UpdateAbilitiesDisplay();
+}
+
+private void UpdateAbilitiesDisplay()
+{
+	if (_currentCharacter.UnlockedAbilities.Count == 0)
+	{
+		_abilitiesLabel.Text = "(No special abilities unlocked)";
+		return;
+	}
+	
+	string text = "";
+	
+	foreach (var ability in _currentCharacter.UnlockedAbilities)
+	{
+		string selectedMark = ability == _currentCharacter.SelectedAbility ? "★ " : "  ";
+		text += $"{selectedMark}{ability.AbilityIcon} {ability.Name}\n";
+		text += $"   Cost: {ability.Cost} SP\n";
+		text += $"   {ability.Description}\n\n";
+	}
+	
+	// Show current special meter
+	text += $"Special Power: {_currentCharacter.SpecialMeter}/{_currentCharacter.MaxSpecialMeter}";
+	
+	_abilitiesLabel.Text = text;
+}
 		
 		private void UpdateEquipmentSlots()
 		{
