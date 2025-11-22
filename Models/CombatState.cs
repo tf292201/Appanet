@@ -106,6 +106,12 @@ namespace Appanet.Scripts.Models
 		}
 	}
 	
+	 // NEW - Process status effects for player team
+	foreach (var member in PlayerTeam.Where(p => p.IsAlive))
+	{
+		member.Character.ProcessStatusEffects();
+	}
+	
 	_actorsWhoActedThisTurn.Clear();  // Reset for new turn
 	QueuedActions.Clear();
 	ActionsNeeded = PlayerTeam.Count(p => p.IsAlive);
@@ -315,6 +321,11 @@ public bool AllPlayersHaveActed()
 public void StartEnemyTurn()
 {
 	if (IsCombatOver) return;
+	
+	foreach (var enemy in EnemyTeam.Where(e => e.IsAlive))
+	{
+		enemy.Character.ProcessStatusEffects();
+	}
 	
 	CurrentPhase = TurnPhase.EnemyTeamExecuting;
 	OnPhaseChange?.Invoke(CurrentPhase);

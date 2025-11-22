@@ -122,6 +122,7 @@ layout_mode = 2
 theme_override_constants/separation = 7
 
 [node name="CharacterPanel" type="Panel" parent="MainContainer/LeftPanel"]
+light_mask = 0
 custom_minimum_size = Vector2(0, 160)
 layout_mode = 2
 
@@ -130,7 +131,7 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 41.0
+offset_left = 12.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -163,7 +164,7 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
+offset_left = 25.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -173,7 +174,6 @@ theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
 theme_override_fonts/font = SubResource("SystemFont_fbyx0")
 theme_override_font_sizes/font_size = 30
 text = "SPECIAL ABILITIES"
-horizontal_alignment = 1
 
 [node name="AbilitiesLabel" type="Label" parent="MainContainer/LeftPanel/AbilitiesPanel/VBox"]
 layout_mode = 2

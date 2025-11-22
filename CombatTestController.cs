@@ -480,10 +480,10 @@ private void OnHealTargetSelected(CombatParticipant target)
 		}
 		
 		private void UpdateUI()
-		{
- 		   UpdateTeamDisplay(_playerTeamUI, _combat.PlayerTeam, true);  // ← Changed to PlayerTeam (all members)
- 		   UpdateTeamDisplay(_enemyTeamUI, _combat.EnemyTeam, false);   // ← Changed to EnemyTeam (all enemies)
-		}
+{
+	UpdateTeamDisplay(_playerTeamUI, _combat.PlayerTeam, true);  // Show ALL allies (alive and defeated)
+	UpdateTeamDisplay(_enemyTeamUI, _combat.GetAliveEnemies(), false);   // Only show ALIVE enemies
+}
 		
 private void UpdateTeamDisplay(VBoxContainer container, List<CombatParticipant> team, bool isPlayerTeam)
 {
@@ -700,22 +700,102 @@ private void OnDefendButtonPressed()
 	}
 } 
 
-private void OnSpecialButtonPressed()  // ← Now it's a separate method
+private void OnSpecialButtonPressed()
 {
-	// Check if character can use special
+	// Show ability selection menu
+	ShowSpecialAbilitySelection();
+}
+
+private void ShowSpecialAbilitySelection()
+{
+	_targetSelection.Visible = true;
+	_actionButtons.Visible = false;
+	
+	// Clear previous buttons
+	foreach (Node child in _targetSelection.GetChildren())
+	{
+		child.QueueFree();
+	}
+	
+	// Add title
+	var title = new Label();
+	title.Text = $"{_currentActorSelecting.GetDisplayName()}: Select Special Ability";
+	title.HorizontalAlignment = HorizontalAlignment.Center;
+	title.AddThemeColorOverride("font_color", new Color(1, 0.5f, 1));
+	title.AddThemeFontSizeOverride("font_size", 18);
+	_targetSelection.AddChild(title);
+	
+	// Get all unlocked abilities
+	var abilities = _currentActorSelecting.Character.UnlockedAbilities;
+	
+	if (abilities.Count == 0)
+	{
+		var noAbilitiesLabel = new Label();
+		noAbilitiesLabel.Text = "No special abilities unlocked!";
+		noAbilitiesLabel.HorizontalAlignment = HorizontalAlignment.Center;
+		_targetSelection.AddChild(noAbilitiesLabel);
+	}
+	else
+	{
+		foreach (var ability in abilities)
+		{
+			var btn = new Button();
+			
+			// Check if can afford
+			bool canAfford = _currentActorSelecting.Character.SpecialMeter >= ability.Cost;
+			
+			// Build button text
+			string buttonText = $"{ability.AbilityIcon} {ability.Name}\n";
+			buttonText += $"Cost: {ability.Cost} SP (Have: {_currentActorSelecting.Character.SpecialMeter})\n";
+			buttonText += $"{ability.Description}";
+			
+			btn.Text = buttonText;
+			btn.CustomMinimumSize = new Vector2(300, 80);
+			btn.Disabled = !canAfford;
+			
+			// Add visual indicator if it's the selected/equipped ability
+			if (ability == _currentActorSelecting.Character.SelectedAbility)
+			{
+				btn.AddThemeColorOverride("font_color", new Color(1, 1, 0));  // Yellow for equipped
+			}
+			
+			if (canAfford)
+			{
+				var abilityToUse = ability;
+				btn.Pressed += () => OnSpecialAbilitySelected(abilityToUse);
+			}
+			else
+			{
+				// Grey out if can't afford
+				btn.Modulate = new Color(0.5f, 0.5f, 0.5f);
+			}
+			
+			_targetSelection.AddChild(btn);
+		}
+	}
+	
+	// Add separator
+	var separator = new HSeparator();
+	_targetSelection.AddChild(separator);
+	
+	// Add cancel button
+	var cancelBtn = new Button();
+	cancelBtn.Text = "← Back";
+	cancelBtn.CustomMinimumSize = new Vector2(250, 40);
+	cancelBtn.Pressed += () =>
+	{
+		_targetSelection.Visible = false;
+		_actionButtons.Visible = true;
+	};
+	_targetSelection.AddChild(cancelBtn);
+}
+
+private void OnSpecialAbilitySelected(Appanet.Scripts.Models.SpecialAbilities.SpecialAbility ability)
+{
+	// Check if character can use special (just to be safe)
 	if (!_currentActorSelecting.Character.CanUseSpecial())
 	{
 		Log("⚠️ Not enough Special Power!");
-		return;
-	}
-	
-	// If character has multiple abilities, show selection menu
-	// For now, they only have 1, so execute directly
-	var ability = _currentActorSelecting.Character.SelectedAbility;
-	
-	if (ability == null)
-	{
-		Log("⚠️ No special ability equipped!");
 		return;
 	}
 	
@@ -726,16 +806,137 @@ private void OnSpecialButtonPressed()  // ← Now it's a separate method
 		case Appanet.Scripts.Models.SpecialAbilities.TargetType.AllAllies:
 		case Appanet.Scripts.Models.SpecialAbilities.TargetType.AllEnemies:
 			// Execute immediately (no target selection needed)
+			_targetSelection.Visible = false;
 			ExecuteSpecialAbility(ability);
 			break;
 			
 		case Appanet.Scripts.Models.SpecialAbilities.TargetType.SingleAlly:
-			// Show ally selection (implement later if needed)
+			// Show ally selection (implement if needed)
+			ShowSingleAllyTargetSelection(ability);
 			break;
 			
 		case Appanet.Scripts.Models.SpecialAbilities.TargetType.SingleEnemy:
-			// Show enemy selection (implement later if needed)
+			// Show enemy selection (implement if needed)
+			ShowSingleEnemyTargetSelection(ability);
 			break;
+	}
+}
+
+// For future single-target abilities
+private void ShowSingleEnemyTargetSelection(Appanet.Scripts.Models.SpecialAbilities.SpecialAbility ability)
+{
+	_targetSelection.Visible = true;
+	
+	// Clear previous buttons
+	foreach (Node child in _targetSelection.GetChildren())
+	{
+		child.QueueFree();
+	}
+	
+	// Add title
+	var title = new Label();
+	title.Text = $"{ability.Name}: Select Target";
+	title.HorizontalAlignment = HorizontalAlignment.Center;
+	title.AddThemeColorOverride("font_color", new Color(1, 0.5f, 1));
+	_targetSelection.AddChild(title);
+	
+	// Show all alive enemies
+	var enemies = _combat.GetAliveEnemies();
+	foreach (var enemy in enemies)
+	{
+		var btn = new Button();
+		btn.Text = $"{enemy.Character.Name}\nHP: {enemy.Character.Health}/{enemy.Character.MaxHealth}";
+		btn.CustomMinimumSize = new Vector2(250, 60);
+		
+		var targetEnemy = enemy;
+		var abilityToUse = ability;
+		btn.Pressed += () => OnSingleTargetAbilityConfirmed(abilityToUse, targetEnemy);
+		
+		_targetSelection.AddChild(btn);
+	}
+	
+	// Add cancel button
+	var cancelBtn = new Button();
+	cancelBtn.Text = "← Back";
+	cancelBtn.CustomMinimumSize = new Vector2(250, 40);
+	cancelBtn.Pressed += () => ShowSpecialAbilitySelection();
+	_targetSelection.AddChild(cancelBtn);
+}
+
+private void ShowSingleAllyTargetSelection(Appanet.Scripts.Models.SpecialAbilities.SpecialAbility ability)
+{
+	_targetSelection.Visible = true;
+	
+	// Clear previous buttons
+	foreach (Node child in _targetSelection.GetChildren())
+	{
+		child.QueueFree();
+	}
+	
+	// Add title
+	var title = new Label();
+	title.Text = $"{ability.Name}: Select Ally";
+	title.HorizontalAlignment = HorizontalAlignment.Center;
+	title.AddThemeColorOverride("font_color", new Color(1, 0.5f, 1));
+	_targetSelection.AddChild(title);
+	
+	// Show all alive allies
+	var allies = _combat.GetAliveAllies();
+	foreach (var ally in allies)
+	{
+		var btn = new Button();
+		btn.Text = $"{ally.GetDisplayName()}\nHP: {ally.Character.Health}/{ally.Character.MaxHealth}";
+		btn.CustomMinimumSize = new Vector2(250, 60);
+		
+		var targetAlly = ally;
+		var abilityToUse = ability;
+		btn.Pressed += () => OnSingleTargetAbilityConfirmed(abilityToUse, targetAlly);
+		
+		_targetSelection.AddChild(btn);
+	}
+	
+	// Add cancel button
+	var cancelBtn = new Button();
+	cancelBtn.Text = "← Back";
+	cancelBtn.CustomMinimumSize = new Vector2(250, 40);
+	cancelBtn.Pressed += () => ShowSpecialAbilitySelection();
+	_targetSelection.AddChild(cancelBtn);
+}
+
+private void OnSingleTargetAbilityConfirmed(Appanet.Scripts.Models.SpecialAbilities.SpecialAbility ability, CombatParticipant target)
+{
+	_targetSelection.Visible = false;
+	
+	// For single-target abilities, we need to modify the ability to work with a single target
+	// For now, just execute with a list containing one target
+	var targets = new List<CombatParticipant> { target };
+	
+	// Execute the ability through the combat state system
+	bool actionExecuted = _combat.ExecuteSpecialAbilityImmediately(_currentActorSelecting, ability);
+	
+	if (!actionExecuted)
+	{
+		return;
+	}
+	
+	// Update UI
+	UpdateUI();
+	
+	// Check if combat is over
+	if (_combat.IsCombatOver)
+	{
+		return;
+	}
+	
+	// Check if all players have acted
+	if (_combat.AllPlayersHaveActed())
+	{
+		HidePlayerActions();
+		_combat.StartEnemyTurn();
+	}
+	else
+	{
+		PromptNextAction();
 	}
 }
 
