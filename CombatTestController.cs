@@ -907,12 +907,8 @@ private void OnSingleTargetAbilityConfirmed(Appanet.Scripts.Models.SpecialAbilit
 {
 	_targetSelection.Visible = false;
 	
-	// For single-target abilities, we need to modify the ability to work with a single target
-	// For now, just execute with a list containing one target
-	var targets = new List<CombatParticipant> { target };
-	
-	// Execute the ability through the combat state system
-	bool actionExecuted = _combat.ExecuteSpecialAbilityImmediately(_currentActorSelecting, ability);
+	// Execute the ability with the selected target
+	bool actionExecuted = _combat.ExecuteSpecialAbilityImmediately(_currentActorSelecting, ability, target);
 	
 	if (!actionExecuted)
 	{

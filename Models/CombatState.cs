@@ -274,7 +274,7 @@ public bool ExecuteUseItemImmediately(CombatParticipant actor, string itemName, 
 	return true;
 }
 
-public bool ExecuteSpecialAbilityImmediately(CombatParticipant actor, SpecialAbility ability)
+public bool ExecuteSpecialAbilityImmediately(CombatParticipant actor, SpecialAbility ability, CombatParticipant singleTarget = null)
 {
 	if (IsCombatOver) return false;
 	
@@ -292,11 +292,13 @@ public bool ExecuteSpecialAbilityImmediately(CombatParticipant actor, SpecialAbi
 	}
 	
 	// Execute the ability
-	// For abilities that target all, we pass the appropriate list
 	List<CombatParticipant> targets = ability.TargetType switch
 	{
+		TargetType.Self => new List<CombatParticipant> { actor },
 		TargetType.AllAllies => GetAliveAllies(),
 		TargetType.AllEnemies => GetAliveEnemies(),
+		TargetType.SingleEnemy => singleTarget != null ? new List<CombatParticipant> { singleTarget } : new List<CombatParticipant>(),
+		TargetType.SingleAlly => singleTarget != null ? new List<CombatParticipant> { singleTarget } : new List<CombatParticipant>(),
 		_ => new List<CombatParticipant>()
 	};
 	

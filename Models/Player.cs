@@ -28,6 +28,7 @@ namespace Appanet.Scripts.Models
 			Money = 50;
 			
 			UnlockAbility(new StreetLightsComingOn());
+			UnlockAbility(new StaticBurst());
 		}
 		
 		// Money management methods
