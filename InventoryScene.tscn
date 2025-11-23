@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://dkerqjxtwsokm"]
+[gd_scene load_steps=25 format=3 uid="uid://dkerqjxtwsokm"]
 
 [ext_resource type="Script" uid="uid://b2520kwonluru" path="res://InventorySceneController.cs" id="1_bjrb0"]
 
@@ -6,40 +6,108 @@
 font_names = PackedStringArray("BoldPixels")
 
 [sub_resource type="SystemFont" id="SystemFont_n7od8"]
-font_names = PackedStringArray("Impact")
+font_names = PackedStringArray("Pixel Operator SC")
 
 [sub_resource type="SystemFont" id="SystemFont_425wb"]
 font_names = PackedStringArray("BoldPixels")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vtkw3"]
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [sub_resource type="SystemFont" id="SystemFont_ec3io"]
 font_names = PackedStringArray("BoldPixels")
 
 [sub_resource type="SystemFont" id="SystemFont_ews44"]
-font_names = PackedStringArray("RETROTECH")
+font_names = PackedStringArray("Pixel Operator HB")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_24sip"]
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(10.505, 10.505, 10.505, 0.682)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+shadow_color = Color(0, 0.62352943, 0, 0.6)
 
 [sub_resource type="SystemFont" id="SystemFont_fbyx0"]
 font_names = PackedStringArray("BoldPixels")
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_acwh2"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
 [sub_resource type="SystemFont" id="SystemFont_pa2hx"]
-font_names = PackedStringArray("RETROTECH")
+font_names = PackedStringArray("Pixel Operator HB")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n7od8"]
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(10.505, 10.505, 10.505, 0.682)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [sub_resource type="SystemFont" id="SystemFont_lwhqj"]
 font_names = PackedStringArray("BoldPixels")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ec3io"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
 
 [sub_resource type="SystemFont" id="SystemFont_acwh2"]
 font_names = PackedStringArray("BoldPixels")
 
 [sub_resource type="SystemFont" id="SystemFont_cx00b"]
-font_names = PackedStringArray("RETROTECH")
+font_names = PackedStringArray("Pixel Operator HB")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lwhqj"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
 
 [sub_resource type="SystemFont" id="SystemFont_vtkw3"]
 font_names = PackedStringArray("BoldPixels")
 
 [sub_resource type="SystemFont" id="SystemFont_qatiy"]
-font_names = PackedStringArray("RETROTECH")
+font_names = PackedStringArray("Pixel Operator HB")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bjrb0"]
+bg_color = Color(0.0018410678, 0.0018410682, 0.0018410678, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(10.505, 10.505, 10.505, 0.682)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [sub_resource type="SystemFont" id="SystemFont_24sip"]
-font_names = PackedStringArray("BoldPixels")
+font_names = PackedStringArray("Pixel Operator HB")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_425wb"]
+bg_color = Color(0.003921569, 0.003921569, 0.003921569, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(10.505001, 10.505001, 10.505001, 0.682)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [sub_resource type="SystemFont" id="SystemFont_0t5ay"]
 font_names = PackedStringArray("RETROTECH")
@@ -63,7 +131,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0.15294355, 0.31499133, 1)
+color = Color(0, 0.00025598455, 0.0010121485, 1)
 
 [node name="TopBar" type="Panel" parent="."]
 layout_mode = 1
@@ -90,7 +158,7 @@ offset_top = 18.0
 offset_right = 1149.0
 offset_bottom = 53.0
 theme_override_fonts/font = SubResource("SystemFont_n7od8")
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 23
 text = "Level 1 | XP: 0/100 | $50"
 
 [node name="BackButton" type="Button" parent="TopBar"]
@@ -101,6 +169,7 @@ offset_top = 17.0
 offset_right = 209.0
 offset_bottom = 49.0
 theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
+theme_override_colors/font_focus_color = Color(0.10980392, 0.05882353, 1, 0.6666667)
 theme_override_fonts/font = SubResource("SystemFont_425wb")
 theme_override_font_sizes/font_size = 24
 text = "BACK"
@@ -131,17 +200,22 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
+offset_left = 27.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CharacterTabs" type="HBoxContainer" parent="MainContainer/LeftPanel/CharacterPanel/VBox"]
+[node name="TabsPanel" type="PanelContainer" parent="MainContainer/LeftPanel/CharacterPanel/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_vtkw3")
+
+[node name="CharacterTabs" type="HBoxContainer" parent="MainContainer/LeftPanel/CharacterPanel/VBox/TabsPanel"]
 layout_mode = 2
 theme_override_constants/separation = 5
 
 [node name="NameLabel" type="Label" parent="MainContainer/LeftPanel/CharacterPanel/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
+theme_override_colors/font_shadow_color = Color(0.10980392, 0.05882353, 1, 0.6666667)
 theme_override_fonts/font = SubResource("SystemFont_ec3io")
 theme_override_font_sizes/font_size = 28
 text = "CHARACTER NAME"
@@ -150,7 +224,7 @@ autowrap_mode = 2
 [node name="StatsLabel" type="Label" parent="MainContainer/LeftPanel/CharacterPanel/VBox"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_ews44")
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 24
 text = "HP: 100/100
 ATK: 10
 DEF: 3"
@@ -158,6 +232,7 @@ DEF: 3"
 [node name="AbilitiesPanel" type="Panel" parent="MainContainer/LeftPanel"]
 custom_minimum_size = Vector2(0, 189)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_24sip")
 
 [node name="VBox" type="VBoxContainer" parent="MainContainer/LeftPanel/AbilitiesPanel"]
 layout_mode = 1
@@ -171,13 +246,21 @@ grow_vertical = 2
 [node name="Title" type="Label" parent="MainContainer/LeftPanel/AbilitiesPanel/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
+theme_override_colors/font_shadow_color = Color(0.10980392, 0.05882353, 1, 0.6666667)
 theme_override_fonts/font = SubResource("SystemFont_fbyx0")
 theme_override_font_sizes/font_size = 30
 text = "SPECIAL ABILITIES"
 
-[node name="AbilitiesLabel" type="Label" parent="MainContainer/LeftPanel/AbilitiesPanel/VBox"]
+[node name="ScrollContainer" type="ScrollContainer" parent="MainContainer/LeftPanel/AbilitiesPanel/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_acwh2")
+horizontal_scroll_mode = 0
+
+[node name="AbilitiesLabel" type="Label" parent="MainContainer/LeftPanel/AbilitiesPanel/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
 theme_override_constants/line_spacing = 3
 theme_override_fonts/font = SubResource("SystemFont_pa2hx")
 theme_override_font_sizes/font_size = 20
@@ -187,6 +270,7 @@ autowrap_mode = 2
 [node name="EquipmentPanel" type="Panel" parent="MainContainer/LeftPanel"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_n7od8")
 
 [node name="Title" type="Label" parent="MainContainer/LeftPanel/EquipmentPanel"]
 layout_mode = 1
@@ -195,6 +279,7 @@ anchor_right = 1.0
 offset_bottom = 23.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
+theme_override_colors/font_shadow_color = Color(0.10980392, 0.05882353, 1, 0.6666667)
 theme_override_fonts/font = SubResource("SystemFont_lwhqj")
 theme_override_font_sizes/font_size = 30
 text = "EQUIPPED"
@@ -214,6 +299,7 @@ theme_override_constants/separation = 10
 custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_ec3io")
 
 [node name="VBox" type="VBoxContainer" parent="MainContainer/LeftPanel/EquipmentPanel/HBox/WeaponSlot"]
 layout_mode = 1
@@ -226,6 +312,7 @@ grow_vertical = 2
 [node name="SlotTitle" type="Label" parent="MainContainer/LeftPanel/EquipmentPanel/HBox/WeaponSlot/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
+theme_override_colors/font_shadow_color = Color(0.10980392, 0.05882353, 1, 0.6666667)
 theme_override_fonts/font = SubResource("SystemFont_acwh2")
 theme_override_font_sizes/font_size = 28
 text = "WEAPON"
@@ -234,7 +321,7 @@ horizontal_alignment = 1
 [node name="ItemLabel" type="Label" parent="MainContainer/LeftPanel/EquipmentPanel/HBox/WeaponSlot/VBox"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_cx00b")
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 20
 text = " No Weapon\\n(Click to equip)"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -244,6 +331,7 @@ autowrap_mode = 2
 custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_lwhqj")
 
 [node name="VBox" type="VBoxContainer" parent="MainContainer/LeftPanel/EquipmentPanel/HBox/ArmorSlot"]
 layout_mode = 1
@@ -256,6 +344,7 @@ grow_vertical = 2
 [node name="SlotTitle" type="Label" parent="MainContainer/LeftPanel/EquipmentPanel/HBox/ArmorSlot/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
+theme_override_colors/font_shadow_color = Color(0.10980392, 0.05882353, 1, 0.6666667)
 theme_override_fonts/font = SubResource("SystemFont_vtkw3")
 theme_override_font_sizes/font_size = 28
 text = "ARMOR"
@@ -264,7 +353,7 @@ horizontal_alignment = 1
 [node name="ItemLabel" type="Label" parent="MainContainer/LeftPanel/EquipmentPanel/HBox/ArmorSlot/VBox"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_qatiy")
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 20
 text = " No Armor\\n(Click to equip)"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -273,6 +362,7 @@ autowrap_mode = 2
 [node name="InventoryPanel" type="Panel" parent="MainContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_bjrb0")
 
 [node name="Title" type="Label" parent="MainContainer/InventoryPanel"]
 layout_mode = 1
@@ -281,8 +371,9 @@ anchor_right = 1.0
 offset_bottom = 23.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
+theme_override_colors/font_shadow_color = Color(0.10980392, 0.05882353, 1, 0.6666667)
 theme_override_fonts/font = SubResource("SystemFont_24sip")
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 30
 text = "AVAILABLE EQUIPMENT"
 horizontal_alignment = 1
 
@@ -291,7 +382,9 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 34.0
+offset_left = 15.0
+offset_top = 35.0
+offset_right = -16.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -299,19 +392,21 @@ grow_vertical = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/h_separation = 10
+theme_override_constants/h_separation = 4
 theme_override_constants/v_separation = 10
-columns = 3
+columns = 2
 
 [node name="ItemDetailsPanel" type="Panel" parent="MainContainer"]
 custom_minimum_size = Vector2(350, 0)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_425wb")
 
 [node name="VBox" type="VBoxContainer" parent="MainContainer/ItemDetailsPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_bottom = -29.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -327,6 +422,8 @@ autowrap_mode = 2
 
 [node name="ButtonBox" type="HBoxContainer" parent="MainContainer/ItemDetailsPanel/VBox"]
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 theme_override_constants/separation = 10
 
 [node name="EquipButton" type="Button" parent="MainContainer/ItemDetailsPanel/VBox/ButtonBox"]

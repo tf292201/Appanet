@@ -34,7 +34,7 @@ namespace Appanet.Scripts.UI
 		
 	public override void _Ready()
 {
-	GD.Print($"=== InventoryScene _Ready() START === (Children in tabs: {GetNode<HBoxContainer>("MainContainer/LeftPanel/CharacterPanel/VBox/CharacterTabs").GetChildCount()})");
+	GD.Print("=== InventoryScene _Ready() START ===");
 	
 	try {
 		// Get UI references - CORRECTED PATHS
@@ -52,10 +52,9 @@ namespace Appanet.Scripts.UI
 		_itemDetailsLabel = GetNode<Label>("MainContainer/ItemDetailsPanel/VBox/DetailsLabel");
 		_equipButton = GetNode<Button>("MainContainer/ItemDetailsPanel/VBox/ButtonBox/EquipButton");
 		_unequipButton = GetNode<Button>("MainContainer/ItemDetailsPanel/VBox/ButtonBox/UnequipButton");
-		_abilitiesLabel = GetNode<Label>("MainContainer/LeftPanel/AbilitiesPanel/VBox/AbilitiesLabel");  
+		_abilitiesLabel = GetNode<Label>("MainContainer/LeftPanel/AbilitiesPanel/VBox/ScrollContainer/AbilitiesLabel");
+		_characterTabs = GetNode<HBoxContainer>("MainContainer/LeftPanel/CharacterPanel/VBox/TabsPanel/CharacterTabs");
 		
-		
-		_characterTabs = GetNode<HBoxContainer>("MainContainer/LeftPanel/CharacterPanel/VBox/CharacterTabs");
 		GD.Print($"✓ All UI nodes found! Tabs has {_characterTabs.GetChildCount()} children");
 		
 		// CLEAR TABS IMMEDIATELY
@@ -183,7 +182,7 @@ namespace Appanet.Scripts.UI
 		if (customFont != null)
 		{
 			tabButton.AddThemeFontOverride("font", customFont);
-			tabButton.AddThemeFontSizeOverride("font_size", 16);  // Reduced from 20 to fit better
+			tabButton.AddThemeFontSizeOverride("font_size", 18);  // Reduced from 20 to fit better
 		}
 		
 		tabButton.Pressed += () => SwitchCharacter(index);
