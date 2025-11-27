@@ -87,7 +87,7 @@ private void InitializeCombat()
 	// Michael with weapon and armor
 	var michael = Ally.CreateMichaelWebb();
 	var michaelWeapon = Weapon.CreateMagliteFlashlight();
-	var michaelArmor = Armor.CreateDenimJacket();
+	var michaelArmor = Armor.CreateFlannel();
 	michael.Inventory.AddItem(michaelWeapon);
 	michael.Inventory.AddItem(michaelArmor);
 	michael.EquipWeapon(michaelWeapon);

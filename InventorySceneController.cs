@@ -28,6 +28,11 @@ namespace Appanet.Scripts.UI
 		private Button _unequipButton;
 		private HBoxContainer _characterTabs;
 		private Label _abilitiesLabel;
+		private GridContainer _weaponsGrid;
+		private GridContainer _armorGrid;
+		private GridContainer _consumablesGrid;
+		private Button _useButton;
+		
 		
 		// State
 		private Item _selectedItem;
@@ -52,8 +57,19 @@ namespace Appanet.Scripts.UI
 		_itemDetailsLabel = GetNode<Label>("MainContainer/ItemDetailsPanel/VBox/DetailsLabel");
 		_equipButton = GetNode<Button>("MainContainer/ItemDetailsPanel/VBox/ButtonBox/EquipButton");
 		_unequipButton = GetNode<Button>("MainContainer/ItemDetailsPanel/VBox/ButtonBox/UnequipButton");
+		_useButton = GetNode<Button>("MainContainer/ItemDetailsPanel/VBox/ButtonBox/UseButton");  // MUST BE HERE
 		_abilitiesLabel = GetNode<Label>("MainContainer/LeftPanel/AbilitiesPanel/VBox/ScrollContainer/AbilitiesLabel");
 		_characterTabs = GetNode<HBoxContainer>("MainContainer/LeftPanel/CharacterPanel/VBox/TabsPanel/CharacterTabs");
+		_weaponsGrid = GetNode<GridContainer>("MainContainer/InventoryPanel/MainVBox/EquipmentSection/ScrollContainer/SplitContainer/WeaponsSection/WeaponsGrid");
+		_armorGrid = GetNode<GridContainer>("MainContainer/InventoryPanel/MainVBox/EquipmentSection/ScrollContainer/SplitContainer/ArmorSection/ArmorGrid");
+		_consumablesGrid = GetNode<GridContainer>("MainContainer/InventoryPanel/MainVBox/ConsumablesSection/ScrollContainer/ConsumablesGrid");
+		_equipButton = GetNode<Button>("MainContainer/ItemDetailsPanel/VBox/ButtonBox/EquipButton");
+		_unequipButton = GetNode<Button>("MainContainer/ItemDetailsPanel/VBox/ButtonBox/UnequipButton");
+
+		
+		
+		
+		
 		
 		GD.Print($"✓ All UI nodes found! Tabs has {_characterTabs.GetChildCount()} children");
 		
@@ -299,86 +315,359 @@ private void UpdateAbilitiesDisplay()
 	_abilitiesLabel.Text = text;
 }
 		
-		private void UpdateEquipmentSlots()
+	private void UpdateEquipmentSlots()
+{
+	// Get equipped items based on character type
+	Weapon equippedWeapon = null;
+	Armor equippedArmor = null;
+	
+	if (_currentCharacter is Player player)
+	{
+		equippedWeapon = player.EquippedWeapon;
+		equippedArmor = player.EquippedArmor;
+	}
+	else if (_currentCharacter is Ally ally)
+	{
+		equippedWeapon = ally.EquippedWeapon;
+		equippedArmor = ally.EquippedArmor;
+	}
+	
+	// Update weapon slot
+	// Find and clear any existing icons in the VBox
+	var weaponVBox = _weaponSlotPanel.GetNode<VBoxContainer>("VBox");
+	foreach (Node child in weaponVBox.GetChildren())
+	{
+		if (child is TextureRect)
+			child.QueueFree();
+	}
+	
+	if (equippedWeapon != null)
+	{
+		if (!string.IsNullOrEmpty(equippedWeapon.IconPath))
 		{
-			// Weapon slot
-			if (_currentCharacter is Player player)
+			var iconTexture = GD.Load<Texture2D>(equippedWeapon.IconPath);
+			if (iconTexture != null)
 			{
-				if (player.EquippedWeapon != null)
-				{
-					_weaponSlotLabel.Text = $"⚔️ {player.EquippedWeapon.Name}\n+{player.EquippedWeapon.AttackBonus} ATK";
-				}
-				else
-				{
-					_weaponSlotLabel.Text = "⚔️ No Weapon\n(Click to equip)";
-				}
+				var textureRect = new TextureRect();
+				textureRect.Texture = iconTexture;
+				textureRect.ExpandMode = TextureRect.ExpandModeEnum.FitWidth;
+				textureRect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+				textureRect.CustomMinimumSize = new Vector2(64, 64);
 				
-				if (player.EquippedArmor != null)
-				{
-					_armorSlotLabel.Text = $"🛡️ {player.EquippedArmor.Name}\n+{player.EquippedArmor.DefenseBonus} DEF";
-				}
-				else
-				{
-					_armorSlotLabel.Text = "🛡️ No Armor\n(Click to equip)";
-				}
-			}
-			else if (_currentCharacter is Ally ally)
-			{
-				if (ally.EquippedWeapon != null)
-				{
-					_weaponSlotLabel.Text = $"⚔️ {ally.EquippedWeapon.Name}\n+{ally.EquippedWeapon.AttackBonus} ATK";
-				}
-				else
-				{
-					_weaponSlotLabel.Text = "⚔️ No Weapon\n(Click to equip)";
-				}
-				
-				if (ally.EquippedArmor != null)
-				{
-					_armorSlotLabel.Text = $"🛡️ {ally.EquippedArmor.Name}\n+{ally.EquippedArmor.DefenseBonus} DEF";
-				}
-				else
-				{
-					_armorSlotLabel.Text = "🛡️ No Armor\n(Click to equip)";
-				}
+				// Add icon to VBox, position it between title and label
+				weaponVBox.AddChild(textureRect);
+				weaponVBox.MoveChild(textureRect, 1);  // Position: 0=title, 1=icon, 2=label
 			}
 		}
+		_weaponSlotLabel.Text = $"{equippedWeapon.Name}\n+{equippedWeapon.AttackBonus} ATK";
+	}
+	else
+	{
+		_weaponSlotLabel.Text = "[Empty]";
+	}
+	
+	// Update armor slot
+	var armorVBox = _armorSlotPanel.GetNode<VBoxContainer>("VBox");
+	foreach (Node child in armorVBox.GetChildren())
+	{
+		if (child is TextureRect)
+			child.QueueFree();
+	}
+	
+	if (equippedArmor != null)
+	{
+		if (!string.IsNullOrEmpty(equippedArmor.IconPath))
+		{
+			var iconTexture = GD.Load<Texture2D>(equippedArmor.IconPath);
+			if (iconTexture != null)
+			{
+				var textureRect = new TextureRect();
+				textureRect.Texture = iconTexture;
+				textureRect.ExpandMode = TextureRect.ExpandModeEnum.FitWidth;
+				textureRect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+				textureRect.CustomMinimumSize = new Vector2(64, 64);
+				
+				// Add icon to VBox, position it between title and label
+				armorVBox.AddChild(textureRect);
+				armorVBox.MoveChild(textureRect, 1);  // Position: 0=title, 1=icon, 2=label
+			}
+		}
+		_armorSlotLabel.Text = $"{equippedArmor.Name}\n+{equippedArmor.DefenseBonus} DEF";
+	}
+	else
+	{
+		_armorSlotLabel.Text = "[Empty]";
+	}
+}
 		
 		private void UpdateInventoryGrid()
+{
+	UpdateEquipmentGrid();
+	UpdateConsumablesGrid();
+}
+
+private void UpdateEquipmentGrid()
+{
+	UpdateWeaponsGrid();
+	UpdateArmorGrid();
+}
+
+private void UpdateWeaponsGrid()
+{
+	GD.Print("--- UpdateWeaponsGrid START ---");
+	
+	// Clear existing items
+	foreach (Node child in _weaponsGrid.GetChildren())
+	{
+		child.QueueFree();
+	}
+	
+	// Get all weapons from player's inventory
+	var player = GameManager.Instance.Player;
+	var weapons = player.Inventory.GetAllItems()
+		.Where(item => item is Weapon)
+		.ToList();
+	
+	GD.Print($"Weapons found: {weapons.Count}");
+	
+	foreach (var item in weapons)
+	{
+		var itemButton = new Button();
+		
+		// Check if item has an icon path
+		if (!string.IsNullOrEmpty(item.IconPath))
 		{
-			// Clear existing items
-			foreach (Node child in _inventoryGrid.GetChildren())
+			var iconTexture = GD.Load<Texture2D>(item.IconPath);
+			
+			if (iconTexture != null)
 			{
-				child.QueueFree();
+				// Icon-only button
+				itemButton.CustomMinimumSize = new Vector2(96, 96);
+				
+				// Create TextureRect to display the icon
+				var textureRect = new TextureRect();
+				textureRect.Texture = iconTexture;
+				textureRect.ExpandMode = TextureRect.ExpandModeEnum.FitWidth;
+				textureRect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+				textureRect.CustomMinimumSize = new Vector2(80, 80);
+				textureRect.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+				
+				// Add icon to button
+				itemButton.AddChild(textureRect);
+				
+				GD.Print($"  Adding weapon with ICON: {item.Name}");
 			}
-			
-			// Get all weapons and armor from player's inventory
-			var player = GameManager.Instance.Player;
-			var items = player.Inventory.GetAllItems()
-				.Where(item => item is Weapon || item is Armor)
-				.ToList();
-			
-			foreach (var item in items)
+			else
 			{
-				var itemButton = new Button();
-				itemButton.CustomMinimumSize = new Vector2(120, 80);
-				
-				string itemText = "";
-				if (item is Weapon weapon)
-				{
-					itemText = $"⚔️ {weapon.Name}\n+{weapon.AttackBonus} ATK\n[{weapon.Rarity}]";
-				}
-				else if (item is Armor armor)
-				{
-					itemText = $"🛡️ {armor.Name}\n+{armor.DefenseBonus} DEF\n[{armor.Rarity}]";
-				}
-				
+				GD.PrintErr($"Failed to load icon: {item.IconPath}");
+				itemButton.CustomMinimumSize = new Vector2(110, 80);
+				string itemText = GetItemText(item);
 				itemButton.Text = itemText;
-				itemButton.Pressed += () => OnItemSelected(item);
-				
-				_inventoryGrid.AddChild(itemButton);
 			}
 		}
+		else
+		{
+			// No icon path, use text
+			itemButton.CustomMinimumSize = new Vector2(110, 80);
+			string itemText = GetItemText(item);
+			itemButton.Text = itemText;
+			GD.Print($"  No icon for: {item.Name}");
+		}
+		
+		itemButton.Pressed += () => OnItemSelected(item);
+		_weaponsGrid.AddChild(itemButton);
+	}
+	
+	GD.Print($"--- UpdateWeaponsGrid COMPLETE ({_weaponsGrid.GetChildCount()} buttons created) ---");
+}
+
+private void UpdateArmorGrid()
+{
+	GD.Print("--- UpdateArmorGrid START ---");
+	
+	// Clear existing items
+	foreach (Node child in _armorGrid.GetChildren())
+	{
+		child.QueueFree();
+	}
+	
+	// Get all armor from player's inventory
+	var player = GameManager.Instance.Player;
+	var armors = player.Inventory.GetAllItems()
+		.Where(item => item is Armor)
+		.ToList();
+	
+	GD.Print($"Armor found: {armors.Count}");
+	
+	foreach (var item in armors)
+	{
+		var itemButton = new Button();
+		
+		// Check if item has an icon path
+		if (!string.IsNullOrEmpty(item.IconPath))
+		{
+			var iconTexture = GD.Load<Texture2D>(item.IconPath);
+			
+			if (iconTexture != null)
+			{
+				// Icon-only button
+				itemButton.CustomMinimumSize = new Vector2(96, 96);
+				
+				// Create TextureRect to display the icon
+				var textureRect = new TextureRect();
+				textureRect.Texture = iconTexture;
+				textureRect.ExpandMode = TextureRect.ExpandModeEnum.FitWidth;
+				textureRect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+				textureRect.CustomMinimumSize = new Vector2(80, 80);
+				textureRect.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+				
+				// Add icon to button
+				itemButton.AddChild(textureRect);
+				
+				GD.Print($"  Adding armor with ICON: {item.Name}");
+			}
+			else
+			{
+				GD.PrintErr($"Failed to load icon: {item.IconPath}");
+				itemButton.CustomMinimumSize = new Vector2(110, 80);
+				string itemText = GetItemText(item);
+				itemButton.Text = itemText;
+			}
+		}
+		else
+		{
+			// No icon path, use text
+			itemButton.CustomMinimumSize = new Vector2(110, 80);
+			string itemText = GetItemText(item);
+			itemButton.Text = itemText;
+			GD.Print($"  No icon for: {item.Name}");
+		}
+		
+		itemButton.Pressed += () => OnItemSelected(item);
+		_armorGrid.AddChild(itemButton);
+	}
+	
+	GD.Print($"--- UpdateArmorGrid COMPLETE ({_armorGrid.GetChildCount()} buttons created) ---");
+}
+
+// Helper method to generate text for items without icons
+private string GetItemText(Item item)
+{
+	if (item is Weapon weapon)
+	{
+		return $"⚔️ {weapon.Name}\n+{weapon.AttackBonus} ATK\n[{weapon.Rarity}]";
+	}
+	else if (item is Armor armor)
+	{
+		return $"🛡️ {armor.Name}\n+{armor.DefenseBonus} DEF\n[{armor.Rarity}]";
+	}
+	return item.Name;
+}
+
+private void UpdateConsumablesGrid()
+{
+	GD.Print("--- UpdateConsumablesGrid START ---");
+	
+	// Clear existing items
+	foreach (Node child in _consumablesGrid.GetChildren())
+	{
+		child.QueueFree();
+	}
+	
+	// Get all consumables from player's inventory
+	var player = GameManager.Instance.Player;
+	var consumables = player.Inventory.GetAllItems()
+		.Where(item => item is Consumable)
+		.ToList();
+	
+	GD.Print($"Consumable items found: {consumables.Count}");
+	
+	if (consumables.Count == 0)
+	{
+		var noItemsLabel = new Label();
+		noItemsLabel.Text = "(No consumables)";
+		noItemsLabel.HorizontalAlignment = HorizontalAlignment.Center;
+		_consumablesGrid.AddChild(noItemsLabel);
+		GD.Print("  No consumables - showing empty message");
+		return;
+	}
+	
+	// Group by name to show quantities
+	var groupedItems = consumables
+		.Cast<Consumable>()
+		.GroupBy(c => c.Name)
+		.Select(g => new { Item = g.First(), Count = g.Count() });
+	
+	foreach (var group in groupedItems)
+	{
+		var itemButton = new Button();
+		itemButton.CustomMinimumSize = new Vector2(96, 96);  // Square icon button
+		
+		// Check if item has an icon path
+		if (!string.IsNullOrEmpty(group.Item.IconPath))
+		{
+			var iconTexture = GD.Load<Texture2D>(group.Item.IconPath);
+			
+			if (iconTexture != null)
+			{
+				// Create a VBoxContainer to hold icon and quantity
+				var vbox = new VBoxContainer();
+				vbox.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+				vbox.Alignment = BoxContainer.AlignmentMode.Center;
+				
+				// Add icon
+				var textureRect = new TextureRect();
+				textureRect.Texture = iconTexture;
+				textureRect.ExpandMode = TextureRect.ExpandModeEnum.FitWidth;
+				textureRect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+				textureRect.CustomMinimumSize = new Vector2(70, 70);
+				textureRect.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+				
+				vbox.AddChild(textureRect);
+				
+				// Add quantity label if more than 1
+				if (group.Count > 1)
+				{
+					var qtyLabel = new Label();
+					qtyLabel.Text = $"x{group.Count}";
+					qtyLabel.HorizontalAlignment = HorizontalAlignment.Center;
+					qtyLabel.AddThemeFontSizeOverride("font_size", 16);
+					qtyLabel.AddThemeColorOverride("font_color", new Color(1, 1, 0));  // Yellow
+					vbox.AddChild(qtyLabel);
+				}
+				
+				itemButton.AddChild(vbox);
+				
+				GD.Print($"  Adding consumable with ICON: {group.Item.Name} x{group.Count}");
+			}
+			else
+			{
+				GD.PrintErr($"Failed to load icon: {group.Item.IconPath}");
+				// Fallback to text
+				string itemText = $"💊 {group.Item.Name}\n";
+				itemText += $"Heals: {group.Item.HealAmount} HP\n";
+				itemText += $"Qty: {group.Count}";
+				itemButton.Text = itemText;
+				itemButton.CustomMinimumSize = new Vector2(110, 80);  // Text button size
+			}
+		}
+		else
+		{
+			// No icon found, use text
+			string itemText = $"💊 {group.Item.Name}\n";
+			itemText += $"Heals: {group.Item.HealAmount} HP\n";
+			itemText += $"Qty: {group.Count}";
+			itemButton.Text = itemText;
+			itemButton.CustomMinimumSize = new Vector2(110, 80);  // Text button size
+			GD.Print($"  No icon path for: {group.Item.Name}");
+		}
+		
+		itemButton.Pressed += () => OnItemSelected(group.Item);
+		_consumablesGrid.AddChild(itemButton);
+	}
+	
+	GD.Print($"--- UpdateConsumablesGrid COMPLETE ({_consumablesGrid.GetChildCount()} buttons created) ---");
+}
 		
 		private void OnItemSelected(Item item)
 		{
@@ -387,123 +676,206 @@ private void UpdateAbilitiesDisplay()
 		}
 		
 		private void UpdateItemDetails()
+{
+	if (_selectedItem == null)
+	{
+		_itemDetailsLabel.Text = "Select an item to view details";
+		_equipButton.Disabled = true;
+		_equipButton.Visible = true;
+		_useButton.Visible = false;
+		_unequipButton.Visible = false;
+		return;
+	}
+	
+	string details = "";
+	
+	if (_selectedItem is Weapon weapon)
+	{
+		details = $"⚔️ {weapon.Name}\n\n";
+		details += $"Rarity: {weapon.Rarity}\n";
+		details += $"Attack Bonus: +{weapon.AttackBonus}\n";
+		details += $"Damage Type: {weapon.DamageType}\n\n";
+		details += $"{weapon.Description}\n\n";
+		
+		if (!string.IsNullOrEmpty(weapon.SpecialEffect))
 		{
-			if (_selectedItem == null)
-			{
-				_itemDetailsLabel.Text = "Select an item to view details";
-				_equipButton.Disabled = true;
-				_unequipButton.Visible = false;
-				return;
-			}
-			
-			string details = "";
-			bool canEquip = false;
-			
-			if (_selectedItem is Weapon weapon)
-			{
-				details = $"⚔️ {weapon.Name}\n\n";
-				details += $"Rarity: {weapon.Rarity}\n";
-				details += $"Attack Bonus: +{weapon.AttackBonus}\n";
-				details += $"Damage Type: {weapon.DamageType}\n\n";
-				details += $"{weapon.Description}\n\n";
-				
-				if (!string.IsNullOrEmpty(weapon.SpecialEffect))
-				{
-					details += $"★ {weapon.SpecialEffect}\n\n";
-				}
-				
-				// Show stat comparison
-				int currentAtk = _currentCharacter.AttackPower;
-				if (_currentCharacter is Player p && p.EquippedWeapon != null)
-					currentAtk += p.EquippedWeapon.AttackBonus;
-				else if (_currentCharacter is Ally a && a.EquippedWeapon != null)
-					currentAtk += a.EquippedWeapon.AttackBonus;
-				
-				int newAtk = _currentCharacter.AttackPower + weapon.AttackBonus;
-				int diff = newAtk - currentAtk;
-				
-				if (diff > 0)
-					details += $"ATK: {currentAtk} → {newAtk} (+{diff})";
-				else if (diff < 0)
-					details += $"ATK: {currentAtk} → {newAtk} ({diff})";
-				else
-					details += $"ATK: {currentAtk} (no change)";
-				
-				canEquip = true;
-			}
-			else if (_selectedItem is Armor armor)
-			{
-				details = $"🛡️ {armor.Name}\n\n";
-				details += $"Rarity: {armor.Rarity}\n";
-				details += $"Defense Bonus: +{armor.DefenseBonus}\n";
-				
-				if (armor.DodgeBonus > 0)
-				{
-					details += $"Dodge Bonus: +{(int)(armor.DodgeBonus * 100)}%\n";
-				}
-				
-				details += $"\n{armor.Description}\n\n";
-				
-				if (!string.IsNullOrEmpty(armor.SpecialEffect))
-				{
-					details += $"★ {armor.SpecialEffect}\n\n";
-				}
-				
-				// Show stat comparison
-				int currentDef = _currentCharacter.Defense;
-				if (_currentCharacter is Player p && p.EquippedArmor != null)
-					currentDef += p.EquippedArmor.DefenseBonus;
-				else if (_currentCharacter is Ally a && a.EquippedArmor != null)
-					currentDef += a.EquippedArmor.DefenseBonus;
-				
-				int newDef = _currentCharacter.Defense + armor.DefenseBonus;
-				int diff = newDef - currentDef;
-				
-				if (diff > 0)
-					details += $"DEF: {currentDef} → {newDef} (+{diff})";
-				else if (diff < 0)
-					details += $"DEF: {currentDef} → {newDef} ({diff})";
-				else
-					details += $"DEF: {currentDef} (no change)";
-				
-				canEquip = true;
-			}
-			
-			_itemDetailsLabel.Text = details;
-			_equipButton.Disabled = !canEquip;
-			_unequipButton.Visible = false;
+			details += $"★ {weapon.SpecialEffect}\n\n";
 		}
 		
-		private void OnEquipPressed()
+		// Show stat comparison
+		int currentAtk = _currentCharacter.AttackPower;
+		if (_currentCharacter is Player p && p.EquippedWeapon != null)
+			currentAtk += p.EquippedWeapon.AttackBonus;
+		else if (_currentCharacter is Ally a && a.EquippedWeapon != null)
+			currentAtk += a.EquippedWeapon.AttackBonus;
+		
+		int newAtk = _currentCharacter.AttackPower + weapon.AttackBonus;
+		int diff = newAtk - currentAtk;
+		
+		if (diff > 0)
+			details += $"ATK: {currentAtk} → {newAtk} (+{diff})";
+		else if (diff < 0)
+			details += $"ATK: {currentAtk} → {newAtk} ({diff})";
+		else
+			details += $"ATK: {currentAtk} (no change)";
+		
+		_equipButton.Visible = true;
+		_equipButton.Disabled = false;
+		_useButton.Visible = false;
+	}
+	else if (_selectedItem is Armor armor)
+	{
+		details = $"🛡️ {armor.Name}\n\n";
+		details += $"Rarity: {armor.Rarity}\n";
+		details += $"Defense Bonus: +{armor.DefenseBonus}\n";
+		
+		if (armor.DodgeBonus > 0)
 		{
-			if (_selectedItem == null) return;
-			
-			if (_selectedItem is Weapon weapon)
-			{
-				if (_currentCharacter is Player player)
-				{
-					player.EquipWeapon(weapon);
-				}
-				else if (_currentCharacter is Ally ally)
-				{
-					ally.EquipWeapon(weapon);
-				}
-			}
-			else if (_selectedItem is Armor armor)
-			{
-				if (_currentCharacter is Player player)
-				{
-					player.EquipArmor(armor);
-				}
-				else if (_currentCharacter is Ally ally)
-				{
-					ally.EquipArmor(armor);
-				}
-			}
-			
-			_selectedItem = null;
-			UpdateUI();
+			details += $"Dodge Bonus: +{(int)(armor.DodgeBonus * 100)}%\n";
 		}
+		
+		details += $"\n{armor.Description}\n\n";
+		
+		if (!string.IsNullOrEmpty(armor.SpecialEffect))
+		{
+			details += $"★ {armor.SpecialEffect}\n\n";
+		}
+		
+		// Show stat comparison
+		int currentDef = _currentCharacter.Defense;
+		if (_currentCharacter is Player p && p.EquippedArmor != null)
+			currentDef += p.EquippedArmor.DefenseBonus;
+		else if (_currentCharacter is Ally a && a.EquippedArmor != null)
+			currentDef += a.EquippedArmor.DefenseBonus;
+		
+		int newDef = _currentCharacter.Defense + armor.DefenseBonus;
+		int diff = newDef - currentDef;
+		
+		if (diff > 0)
+			details += $"DEF: {currentDef} → {newDef} (+{diff})";
+		else if (diff < 0)
+			details += $"DEF: {currentDef} → {newDef} ({diff})";
+		else
+			details += $"DEF: {currentDef} (no change)";
+		
+		_equipButton.Visible = true;
+		_equipButton.Disabled = false;
+		_useButton.Visible = false;
+	}
+	else if (_selectedItem is Consumable consumable)
+	{
+		details = $"💊 {consumable.Name}\n\n";
+		details += $"Rarity: {consumable.Rarity}\n";
+		details += $"Heals: {consumable.HealAmount} HP\n\n";
+		details += $"{consumable.Description}\n\n";
+		details += $"Look: {consumable.Look}\n\n";
+		details += $"Lore: {consumable.Lore}";
+		
+		// Show Use button instead of Equip
+		_equipButton.Visible = false;
+		_useButton.Visible = true;
+		_useButton.Disabled = _currentCharacter.Health >= _currentCharacter.MaxHealth;
+	}
+	
+	_itemDetailsLabel.Text = details;
+	_unequipButton.Visible = false;
+}
+
+private void OnUseButtonPressed()
+{
+	if (_selectedItem == null || !(_selectedItem is Consumable consumable)) return;
+	
+	if (_currentCharacter.Health >= _currentCharacter.MaxHealth)
+	{
+		GD.Print($"{_currentCharacter.Name} is already at full health!");
+		return;
+	}
+	
+	int healthBefore = _currentCharacter.Health;
+	_currentCharacter.Heal(consumable.HealAmount);
+	int healthRestored = _currentCharacter.Health - healthBefore;
+	
+	// Remove item from inventory
+	GameManager.Instance.Player.Inventory.RemoveItem(consumable);
+	
+	GD.Print($"{_currentCharacter.Name} used {consumable.Name} and restored {healthRestored} HP!");
+	
+	_selectedItem = null;
+	UpdateUI();
+}
+		
+		private void OnEquipPressed()
+{
+	if (_selectedItem == null) return;
+	
+	var player = GameManager.Instance.Player;
+	
+	if (_selectedItem is Weapon weapon)
+	{
+		// Unequip current weapon if any
+		if (_currentCharacter is Player p && p.EquippedWeapon != null)
+		{
+			var oldWeapon = p.EquippedWeapon;
+			p.UnequipWeapon();
+			player.Inventory.AddItem(oldWeapon);  // Return to inventory
+		}
+		else if (_currentCharacter is Ally a && a.EquippedWeapon != null)
+		{
+			var oldWeapon = a.EquippedWeapon;
+			a.UnequipWeapon();
+			player.Inventory.AddItem(oldWeapon);  // Return to inventory
+		}
+		
+		// Equip new weapon
+		if (_currentCharacter is Player p2)
+		{
+			p2.EquipWeapon(weapon);
+		}
+		else if (_currentCharacter is Ally a2)
+		{
+			a2.EquipWeapon(weapon);
+		}
+		
+		// CRITICAL: Remove from player inventory
+		player.Inventory.RemoveItem(weapon);
+		
+		GD.Print($"{_currentCharacter.Name} equipped {weapon.Name}");
+	}
+	else if (_selectedItem is Armor armor)
+	{
+		// Unequip current armor if any
+		if (_currentCharacter is Player p && p.EquippedArmor != null)
+		{
+			var oldArmor = p.EquippedArmor;
+			p.UnequipArmor();
+			player.Inventory.AddItem(oldArmor);  // Return to inventory
+		}
+		else if (_currentCharacter is Ally a && a.EquippedArmor != null)
+		{
+			var oldArmor = a.EquippedArmor;
+			a.UnequipArmor();
+			player.Inventory.AddItem(oldArmor);  // Return to inventory
+		}
+		
+		// Equip new armor
+		if (_currentCharacter is Player p2)
+		{
+			p2.EquipArmor(armor);
+		}
+		else if (_currentCharacter is Ally a2)
+		{
+			a2.EquipArmor(armor);
+		}
+		
+		// CRITICAL: Remove from player inventory
+		player.Inventory.RemoveItem(armor);
+		
+		GD.Print($"{_currentCharacter.Name} equipped {armor.Name}");
+	}
+	
+	_selectedItem = null;
+	UpdateUI();
+}
 		
 		private void OnUnequipPressed()
 		{

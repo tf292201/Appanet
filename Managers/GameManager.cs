@@ -20,23 +20,59 @@ namespace Appanet.Scripts.Managers
 		}
 		
 		public void InitializeNewGame()
-		{
-			Player = new Player("Investigator", 100, 10, 3);
+{
+	Player = new Player("Investigator", 100, 10, 3);
+
+	// Add starting weapons
+	var baseballBat = Weapon.CreateBaseballBat();
+	Player.Inventory.AddItem(baseballBat);
+	Player.EquipWeapon(baseballBat);
 	
-			// Add and EQUIP starting weapon
-			var baseballBat = Weapon.CreateBaseballBat();
-			Player.Inventory.AddItem(baseballBat);
-			Player.EquipWeapon(baseballBat);
+	Player.Inventory.AddItem(Weapon.CreateTireIron());
+	Player.Inventory.AddItem(Weapon.CreateMagliteFlashlight());
+	Player.Inventory.AddItem(Weapon.CreatePocketKnife());
+	Player.Inventory.AddItem(Weapon.CreateCodebookHaintbreaker());
+	Player.Inventory.AddItem(Weapon.CreateHamRadioTuningRod());
+	Player.Inventory.AddItem(Weapon.CreateFloppySigils());
+	Player.Inventory.AddItem(Weapon.CreateAcousticCouplerGrenade());
+	Player.Inventory.AddItem(Weapon.CreateCRTBlaster());
 	
-			// Add consumables for testing
-			Player.Inventory.AddItem(Consumable.CreateHealthPotion());
-			Player.Inventory.AddItem(Consumable.CreateHealthPotion());
-			Player.Inventory.AddItem(Consumable.CreateMegaPotion());
-			Player.Inventory.AddItem(Consumable.CreateMasonJarMountainDew());
-			Player.Inventory.AddItem(Consumable.CreatePepperoniRoll());
+	// Add starting armor
+	var leatherJacket = Armor.CreateLeatherJacket();
+	Player.Inventory.AddItem(leatherJacket);
+	Player.EquipArmor(leatherJacket);
 	
-			GD.Print("Game initialized!");
-		}
+
+	Player.Inventory.AddItem(Armor.CreateFlannel());
+	Player.Inventory.AddItem(Armor.CreateConstructionVest());
+	Player.Inventory.AddItem(Armor.CreateMountainModemMail());
+	Player.Inventory.AddItem(Armor.CreateFloppyPlateJerkin());
+	Player.Inventory.AddItem(Armor.CreateCRTCathodeCarapace());
+	Player.Inventory.AddItem(Armor.CreateVHSPhantomPoncho());
+	Player.Inventory.AddItem(Armor.CreateAppalachianSysOpDuster());
+	Player.Inventory.AddItem(Armor.CreateCarhartJacket());
+
+	// Add consumables for testing
+	
+	Player.Inventory.AddItem(Consumable.CreateMasonJarMountainDew());
+	Player.Inventory.AddItem(Consumable.CreatePepperoniRoll());
+	Player.Inventory.AddItem(Consumable.CreateGasolineCoffee());
+	Player.Inventory.AddItem(Consumable.CreateMoonPie());
+	Player.Inventory.AddItem(Consumable.CreateDialUpHealingTonic());
+	Player.Inventory.AddItem(Consumable.CreateCoalDustCandiedPecans());
+	Player.Inventory.AddItem(Consumable.CreateVHSComfortBlanket());
+	Player.Inventory.AddItem(Consumable.CreateTerminalCuredJerky());
+	Player.Inventory.AddItem(Consumable.CreateTerminalCuredJerky());
+	
+	
+	// ADD ALLIES HERE ONCE
+	var michael = Ally.CreateMichaelWebb();
+	var casey = Ally.CreateCase();
+	AddAllyToParty(michael);
+	AddAllyToParty(casey);
+
+	GD.Print("Game initialized with starting equipment!");
+}
 		
 		// NEW - Add ally to party
 		public void AddAllyToParty(Ally ally)

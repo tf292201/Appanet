@@ -26,8 +26,8 @@ namespace Appanet.Scripts.Models
 		
 		public Armor(string name, string description, int defenseBonus, ArmorRarity rarity, 
 					 string era, string look, string lore, string specialEffect = "", int value = 75,
-					 float dodgeBonus = 0f)  // NEW
-			: base(name, description, value)
+					 float dodgeBonus = 0f, string iconPath = "")  // NEW
+			: base(name, description, value, iconPath)
 		{
 			DefenseBonus = defenseBonus;
 			Rarity = rarity;
@@ -118,7 +118,8 @@ namespace Appanet.Scripts.Models
 				"Born from the idea that memory itself warps with time — the poncho plays back flickering clips of the wearer a few seconds out of sync.",
 				"Dodge chance +15%, enemies see afterimages",
 				180,
-				0.15f  // 15% dodge bonus
+				0.15f,  // 15% dodge bonus
+				"res://icons/armor/VHS_Phantom_Poncho.png"
 			);
 			return armor;
 		}
@@ -134,7 +135,9 @@ namespace Appanet.Scripts.Models
 				"A long brown canvas coat lined with login passwords, ANSI art sigils, and pocketfuls of mystical tools (jumper cables, soldering wand, floppy holster).",
 				"The coat that every rural BBS sysop swore they had but no one ever saw them wear in public. Passed down between \"keepers of the node.\"",
 				"Grants +2 to all tech weapon attacks, inventory +5 slots",
-				350
+				350,
+				0.03f, 
+				"res://icons/armor/Sysop_Duster.png"
 			);
 			// Note: Tech weapon bonus handled in Player.cs
 			return armor;
@@ -151,7 +154,9 @@ namespace Appanet.Scripts.Models
 				"Armor built from shattered CRT frames, fused in weird hexagonal plates that shimmer green in the dark.",
 				"Rumored to protect the wearer by bending light and static fields. Some say you can see old screensavers drifting across it at night.",
 				"Reduces damage from energy/electric attacks by 50%",
-				200
+				200,
+				0.03f, 
+				"res://icons/armor/CRT_Carapace.png"
 			);
 			armor.AddResistanceBonus(DamageType.Electric, 0.5f);  // 50% electric resistance
 			return armor;
@@ -168,7 +173,9 @@ namespace Appanet.Scripts.Models
 				"A leather vest reinforced with actual 3.5\" floppy disks, each labeled with odd names like \"HAINT_BACKUP_01.EXE\" or \"PROPHETIC_SAVEFILE\".",
 				"Every floppy holds a protective spell encoded in archaic file formats. Spirits from the valley can't read the old storage tech, and it confuses them.",
 				"Resistance to psychic/curse effects",
-				120
+				120,
+				0.03f, 
+				"res://icons/armor/Floppy_Jerkin.png"
 			);
 			armor.AddResistanceBonus(DamageType.Psychic, 0.3f);  // 30% psychic resistance
 			armor.AddResistanceBonus(DamageType.Curse, 0.3f);    // 30% curse resistance
@@ -186,7 +193,9 @@ namespace Appanet.Scripts.Models
 				"A patched-together suit of denim, quilted cotton, and dangling telephone cords.",
 				"Forged by the old phone-line repairmen who swore they once heard \"voices in the dial tone\" out in the hollers. The braided cords act like protective charms against both spirits and static.",
 				"Immunity to possession, +1 to spirit detection",
-				220
+				220,
+				0.03f, 
+				"res://icons/armor/Mountain_Modem_Mail.png"
 			);
 			armor.AddResistanceBonus(DamageType.Spectral, 0.4f);  // 40% spectral resistance
 			armor.AddResistanceBonus(DamageType.Curse, 0.4f);     // 40% curse resistance (possession)
@@ -195,35 +204,8 @@ namespace Appanet.Scripts.Models
 		
 		// ===== MUNDANE/COMMON ARMOR =====
 		
-		public static Armor CreateLetterJacket()
-		{
-			return new Armor(
-				"High School Letter Jacket",
-				"Your varsity jacket from the football team. The stitching's held up better than the memories.",
-				3,
-				ArmorRarity.Common,
-				"1980s-90s American high school",
-				"A worn wool jacket with leather sleeves and chenille patches. Smells faintly of teenage confidence and gym class.",
-				"Won during the '91 season. You weren't the quarterback, but you were there. That counts for something when things get weird.",
-				"",
-				40
-			);
-		}
 		
-		public static Armor CreateDenimJacket()
-		{
-			return new Armor(
-				"Denim Jacket",
-				"A trusty jean jacket. Light, mobile, and basically useless against anything supernatural.",
-				2,
-				ArmorRarity.Common,
-				"Timeless Americana",
-				"Faded blue denim with frayed cuffs. There's a Nirvana patch on the back that you safety-pinned on last summer.",
-				"Found at the Goodwill in Charleston. It's seen better days, but so have you.",
-				"",
-				25
-			);
-		}
+		
 		
 		public static Armor CreateConstructionVest()
 		{
@@ -236,7 +218,10 @@ namespace Appanet.Scripts.Models
 				"Neon orange with reflective strips. Has a company logo for a mine that closed in '88.",
 				"Your uncle left it in the truck. He said you might need it. He was right, but not for the reasons he thought.",
 				"Easier to spot in darkness",
-				30
+				30,
+				0.03f, 
+				"res://icons/armor/Work_Safety_Vest.png"
+				
 			);
 		}
 		
@@ -251,7 +236,9 @@ namespace Appanet.Scripts.Models
 				"Brown duck canvas, stiff with age and honest labor. The pockets still have receipts from the hardware store.",
 				"Every working man in three counties owns one. Yours has seen the inside of more barns than most.",
 				"",
-				50
+				50,
+				0.03f,
+				"res://icons/armor/Workwear.png"
 			);
 		}
 		
@@ -267,7 +254,8 @@ namespace Appanet.Scripts.Models
 		"Every person in the hollers has three of these. This one's yours. It's seen you through a lot of cold mornings.",
 		"Lightweight and flexible",
 		25,  // Value
-		0.03f  // 3% dodge bonus
+		0.03f,  // 3% dodge bonus
+		"res://icons/armor/flannel_shirt.png"
 	);
 	return flannel;
 }
@@ -283,7 +271,9 @@ namespace Appanet.Scripts.Models
 				"Scuffed black leather with a broken zipper. There's a Harley Davidson logo on the back, but you've never owned a bike.",
 				"Bought it off a guy at the flea market who said it belonged to someone who 'saw things.' You didn't ask what things.",
 				"",
-				80
+				80,
+				0.03f, 
+				"res://icons/armor/leather_jacket.png"
 			);
 		}
 	}

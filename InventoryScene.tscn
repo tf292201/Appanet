@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://dkerqjxtwsokm"]
+[gd_scene load_steps=29 format=3 uid="uid://dkerqjxtwsokm"]
 
 [ext_resource type="Script" uid="uid://b2520kwonluru" path="res://InventorySceneController.cs" id="1_bjrb0"]
 
@@ -6,7 +6,7 @@
 font_names = PackedStringArray("BoldPixels")
 
 [sub_resource type="SystemFont" id="SystemFont_n7od8"]
-font_names = PackedStringArray("Pixel Operator SC")
+font_names = PackedStringArray("RETROTECH")
 
 [sub_resource type="SystemFont" id="SystemFont_425wb"]
 font_names = PackedStringArray("BoldPixels")
@@ -25,7 +25,7 @@ corner_radius_bottom_left = 3
 font_names = PackedStringArray("BoldPixels")
 
 [sub_resource type="SystemFont" id="SystemFont_ews44"]
-font_names = PackedStringArray("Pixel Operator HB")
+font_names = PackedStringArray("BoldPixels")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_24sip"]
 bg_color = Color(0, 0, 0, 1)
@@ -95,7 +95,21 @@ corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
 [sub_resource type="SystemFont" id="SystemFont_24sip"]
-font_names = PackedStringArray("Pixel Operator HB")
+font_names = PackedStringArray("BoldPixels")
+
+[sub_resource type="SystemFont" id="SystemFont_k7o76"]
+font_names = PackedStringArray("BoldPixels")
+
+[sub_resource type="SystemFont" id="SystemFont_34a8k"]
+font_names = PackedStringArray("BoldPixels")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0t5ay"]
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 4
+border_width_right = 4
+border_width_bottom = 4
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_425wb"]
 bg_color = Color(0.003921569, 0.003921569, 0.003921569, 1)
@@ -113,6 +127,9 @@ corner_radius_bottom_left = 5
 font_names = PackedStringArray("RETROTECH")
 
 [sub_resource type="SystemFont" id="SystemFont_nwsdj"]
+font_names = PackedStringArray("BoldPixels")
+
+[sub_resource type="SystemFont" id="SystemFont_x50o4"]
 font_names = PackedStringArray("BoldPixels")
 
 [node name="InventoryScene" type="Control"]
@@ -364,35 +381,92 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_bjrb0")
 
-[node name="Title" type="Label" parent="MainContainer/InventoryPanel"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 23.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
-theme_override_colors/font_shadow_color = Color(0.10980392, 0.05882353, 1, 0.6666667)
-theme_override_fonts/font = SubResource("SystemFont_24sip")
-theme_override_font_sizes/font_size = 30
-text = "AVAILABLE EQUIPMENT"
-horizontal_alignment = 1
-
-[node name="ScrollContainer" type="ScrollContainer" parent="MainContainer/InventoryPanel"]
+[node name="MainVBox" type="VBoxContainer" parent="MainContainer/InventoryPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 15.0
-offset_top = 35.0
-offset_right = -16.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="InventoryGrid" type="GridContainer" parent="MainContainer/InventoryPanel/ScrollContainer"]
+[node name="EquipmentSection" type="VBoxContainer" parent="MainContainer/InventoryPanel/MainVBox"]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainContainer/InventoryPanel/MainVBox/EquipmentSection"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SplitContainer" type="HBoxContainer" parent="MainContainer/InventoryPanel/MainVBox/EquipmentSection/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/h_separation = 4
+
+[node name="WeaponsSection" type="VBoxContainer" parent="MainContainer/InventoryPanel/MainVBox/EquipmentSection/ScrollContainer/SplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="MainContainer/InventoryPanel/MainVBox/EquipmentSection/ScrollContainer/SplitContainer/WeaponsSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
+theme_override_colors/font_shadow_color = Color(0.10980392, 0.05882353, 1, 0.6666667)
+theme_override_fonts/font = SubResource("SystemFont_24sip")
+theme_override_font_sizes/font_size = 28
+text = "WEAPONS"
+horizontal_alignment = 1
+
+[node name="WeaponsGrid" type="GridContainer" parent="MainContainer/InventoryPanel/MainVBox/EquipmentSection/ScrollContainer/SplitContainer/WeaponsSection"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 2
+
+[node name="VSeparator" type="VSeparator" parent="MainContainer/InventoryPanel/MainVBox/EquipmentSection/ScrollContainer/SplitContainer"]
+layout_mode = 2
+
+[node name="ArmorSection" type="VBoxContainer" parent="MainContainer/InventoryPanel/MainVBox/EquipmentSection/ScrollContainer/SplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="MainContainer/InventoryPanel/MainVBox/EquipmentSection/ScrollContainer/SplitContainer/ArmorSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
+theme_override_colors/font_shadow_color = Color(0.10980392, 0.05882353, 1, 0.6666667)
+theme_override_fonts/font = SubResource("SystemFont_k7o76")
+theme_override_font_sizes/font_size = 28
+text = "ARMOR"
+horizontal_alignment = 1
+
+[node name="ArmorGrid" type="GridContainer" parent="MainContainer/InventoryPanel/MainVBox/EquipmentSection/ScrollContainer/SplitContainer/ArmorSection"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 2
+
+[node name="ConsumablesSection" type="VBoxContainer" parent="MainContainer/InventoryPanel/MainVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Title" type="Label" parent="MainContainer/InventoryPanel/MainVBox/ConsumablesSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
+theme_override_colors/font_shadow_color = Color(0.10980392, 0.05882353, 1, 0.6666667)
+theme_override_fonts/font = SubResource("SystemFont_34a8k")
+theme_override_font_sizes/font_size = 30
+text = "CONSUMABLES"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainContainer/InventoryPanel/MainVBox/ConsumablesSection"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_0t5ay")
+
+[node name="ConsumablesGrid" type="GridContainer" parent="MainContainer/InventoryPanel/MainVBox/ConsumablesSection/ScrollContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 columns = 2
 
@@ -444,3 +518,10 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 18
 disabled = true
 text = "REMOVE"
+
+[node name="UseButton" type="Button" parent="MainContainer/ItemDetailsPanel/VBox/ButtonBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.11764706, 0.72156864, 0.2901961, 1)
+theme_override_fonts/font = SubResource("SystemFont_x50o4")
+theme_override_font_sizes/font_size = 26
+text = "USE"

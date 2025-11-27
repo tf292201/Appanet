@@ -26,8 +26,9 @@ namespace Appanet.Scripts.Models
 					  string specialEffect = "", int value = 50, 
 					  DamageType damageType = DamageType.Physical,  // NEW
 					  EnemyType effectiveAgainst = EnemyType.Normal,  // NEW
-					  float bonusDamageVsType = 0f)  // NEW
-			: base(name, description, value)
+					  float bonusDamageVsType = 0f,
+					  string iconPath = "")  // NEW
+			: base(name, description, value, iconPath)
 		{
 			AttackBonus = attackBonus;
 			Rarity = rarity;
@@ -113,7 +114,8 @@ namespace Appanet.Scripts.Models
 				75,
 				DamageType.Electric,
 				EnemyType.Spectral,
-				0.5f  // 50% bonus damage vs spectral
+				0.5f,  // 50% bonus damage vs spectral
+				"res://icons/weapons/CRTblaster.png"
 			);
 		}
 		
@@ -128,7 +130,9 @@ namespace Appanet.Scripts.Models
 				150,
 				DamageType.Psychic,
 				EnemyType.Psychic,
-				0.6f  // 60% bonus vs psychic
+				0.6f,  // 60% bonus vs psychic
+				"res://icons/weapons/Acoustic_grenade.png"
+				
 			);
 		}
 		
@@ -143,7 +147,8 @@ namespace Appanet.Scripts.Models
 				40,
 				DamageType.Curse,
 				EnemyType.Normal,
-				0f
+				0f,
+				"res://icons/weapons/Floppy_Sigil.png"
 			);
 		}
 		
@@ -158,24 +163,12 @@ namespace Appanet.Scripts.Models
 				90,
 				DamageType.Electric,
 				EnemyType.Illusion,
-				0.4f  // 40% bonus vs illusions
+				0.4f,  // 40% bonus vs illusions
+				"res://icons/weapons/Ham_radio_tuning_rod.png"
 			);
 		}
 		
-		public static Weapon CreateCoalLantern()
-		{
-			return new Weapon(
-				"Coal Lantern",
-				"An old miner's carbide lamp, still burning with that warm tungsten glow. In its light, you can see things that exist in the cracks between what is and what was—liminal beings that only show up in old photographs and dying lightbulbs.",
-				5,
-				WeaponRarity.Rare,
-				"Reveals liminal entities, lights dark areas",
-				120,
-				DamageType.Spectral,
-				EnemyType.Spectral,
-				0.3f  // 30% bonus vs spectral
-			);
-		}
+	
 		
 		public static Weapon CreateCodebookHaintbreaker()
 		{
@@ -188,7 +181,8 @@ namespace Appanet.Scripts.Models
 				300,
 				DamageType.Curse,
 				EnemyType.Folklore,
-				0.8f  // 80% bonus vs folklore!
+				0.8f,  // 80% bonus vs folklore!
+				"res://icons/weapons/HaintBreaker.png"
 			);
 		}
 		
@@ -203,7 +197,10 @@ namespace Appanet.Scripts.Models
 				WeaponRarity.Common,
 				"",
 				20,
-				DamageType.Physical
+				DamageType.Physical,
+				EnemyType.Normal,              // ✅ Position 8 - effectiveAgainst
+				0f,                            // ✅ Position 9 - bonusDamageVsType
+				"res://icons/weapons/Bat.png"
 			);
 		}
 		
@@ -216,7 +213,10 @@ namespace Appanet.Scripts.Models
 				WeaponRarity.Common,
 				"Can illuminate dark areas",
 				15,
-				DamageType.Physical
+				DamageType.Physical,
+				EnemyType.Normal,     // ADD THIS - effectiveAgainst
+				 0f,                   // ADD THIS - bonusDamageVsType
+				"res://icons/weapons/Flashlight.png"
 			);
 		}
 		
@@ -229,7 +229,10 @@ namespace Appanet.Scripts.Models
 				WeaponRarity.Common,
 				"Utility tool, can solve certain puzzles",
 				10,
-				DamageType.Physical
+				DamageType.Physical,
+				EnemyType.Normal,     // ADD THIS - effectiveAgainst
+	  		  0f,                   // ADD THIS - bonusDamageVsType
+				"res://icons/weapons/knife.png"
 			);
 		}
 		
@@ -242,7 +245,10 @@ namespace Appanet.Scripts.Models
 				WeaponRarity.Common,
 				"",
 				15,
-				DamageType.Physical
+				DamageType.Physical,
+				EnemyType.Normal,     // ADD THIS - effectiveAgainst
+				0f,                   // ADD THIS - bonusDamageVsType
+				"res://icons/weapons/tireiron.png"
 			);
 		}
 	}

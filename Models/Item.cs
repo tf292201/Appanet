@@ -10,12 +10,14 @@ namespace Appanet.Scripts.Models
 		public string Name { get; protected set; }
 		public string Description { get; protected set; }
 		public int Value { get; protected set; }
+		public string IconPath { get; protected set; } 
 		
-		protected Item(string name, string description, int value = 0)
+		protected Item(string name, string description, int value = 0, string iconPath = "")
 		{
 			Name = name;
 			Description = description;
 			Value = value;
+			IconPath = iconPath; 
 		}
 		
 		// Changed from Player to Character to avoid circular dependency

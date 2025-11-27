@@ -21,8 +21,8 @@ namespace Appanet.Scripts.Models
 		public string Lore { get; private set; }
 		
 		public Consumable(string name, string description, int healAmount, ConsumableRarity rarity, 
-						  string look, string lore, int value = 10)
-			: base(name, description, value)
+						  string look, string lore, int value = 10,  string iconPath = "")
+			: base(name, description, value, iconPath)
 		{
 			HealAmount = healAmount;
 			Rarity = rarity;
@@ -85,7 +85,8 @@ namespace Appanet.Scripts.Models
 				ConsumableRarity.Uncommon,
 				"A green-tinted mason jar labeled with a floppy-disk logo and hand-drawn circuit diagrams.",
 				"Brewed by a mysterious sysop who swears that soda carbonation is \"just trapped healing packets.\" Nobody knows if he's a genius or insane—but it works.",
-				20
+				20,
+				"res://icons/consumables/Mason_Jar_dew.png"
 			);
 		}
 		
@@ -98,7 +99,8 @@ namespace Appanet.Scripts.Models
 				ConsumableRarity.Rare,
 				"Amber bottle labeled \"56k BITTER\" with a phone jack symbol etched in the glass.",
 				"Shake it and it makes the dial-up handshake noise. Somehow—over many years—the tonic learned to \"connect\" your body back together. BBS operators swear by it.",
-				45
+				45,
+				"res://icons/consumables/56k_tonic.png"
 			);
 		}
 		
@@ -111,7 +113,8 @@ namespace Appanet.Scripts.Models
 				ConsumableRarity.Common,
 				"Dark, crystallized pecans in a wax paper bag. They smell like caramelized sugar and coal smoke.",
 				"Miners said these sweet, charred pecans \"put life back in your bones\" during long shifts. The recipe came from the company store—back when it was still open.",
-				12
+				12,
+				"res://icons/consumables/Coaldust_pecans.png"
 			);
 		}
 		
@@ -124,7 +127,8 @@ namespace Appanet.Scripts.Models
 				ConsumableRarity.Legendary,
 				"A blanket woven from magnetic VHS tape; soft, warm, slightly glitchy. When you look closely, you can see sitcom faces flickering in the weave.",
 				"Wrap yourself in years of cherished memories, wholesome static, and stray sitcom laughter. It only works once—after that, the memories fade to white noise.",
-				100
+				100,
+				"res://icons/consumables/VHS_blanket.png"
 			);
 		}
 		
@@ -137,7 +141,8 @@ namespace Appanet.Scripts.Models
 				ConsumableRarity.Uncommon,
 				"Strips of jerky dried on the metal frame of an old IBM terminal. The meat has a faint metallic tang and smells like ozone.",
 				"The warmth from aging power supplies and CRT static was said to \"cure the meat with wisdom.\" Miners and tinkerers swore it toughened both jaw and resolve.",
-				25
+				25,
+				"res://icons/consumables/Terminal_cured_jerky.png"
 			);
 		}
 		
@@ -152,7 +157,8 @@ namespace Appanet.Scripts.Models
 				ConsumableRarity.Common,
 				"A small red vial with a cork stopper.",
 				"Generic healing potion from the corner store. Tastes like cherry cough syrup.",
-				15
+				15,
+				""
 			);
 		}
 		
@@ -165,7 +171,8 @@ namespace Appanet.Scripts.Models
 				ConsumableRarity.Rare,
 				"A large blue vial with an ornate label.",
 				"High-grade healing formula. Expensive, but worth it when you're bleeding out.",
-				35
+				35,
+				""
 			);
 		}
 		
@@ -178,7 +185,8 @@ namespace Appanet.Scripts.Models
 				ConsumableRarity.Common,
 				"Styrofoam cup with burnt coffee that's been on the burner for 6+ hours.",
 				"From the 24-hour Exxon off Route 52. The clerk says it \"puts hair on your chest.\" You're not sure that's a good thing.",
-				5
+				5,
+				"res://icons/consumables/Gas_Station_Coffee.png"
 			);
 		}
 		
@@ -191,7 +199,8 @@ namespace Appanet.Scripts.Models
 				ConsumableRarity.Common,
 				"A marshmallow-chocolate sandwich cookie and an ice-cold Royal Crown Cola.",
 				"Every general store in three counties sells these. Your grandpa lived on them during the mine strikes.",
-				8
+				8,
+				"res://icons/consumables/Pie_Cola.png"
 			);
 		}
 		
@@ -204,7 +213,8 @@ namespace Appanet.Scripts.Models
 				ConsumableRarity.Common,
 				"Fresh-baked bread rolled around sticks of pepperoni. Still warm from the Italian bakery.",
 				"Invented by Giuseppe Argiro in 1927 for coal miners. Simple, genius, and still the best lunch you can get for two bucks.",
-				10
+				10,
+				"res://icons/consumables/Pepperoni_roll.png"
 			);
 		}
 	}
