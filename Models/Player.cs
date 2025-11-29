@@ -16,8 +16,9 @@ namespace Appanet.Scripts.Models
 		public Weapon EquippedWeapon { get; private set; }
 		public Armor EquippedArmor { get; private set; }
 		public int Money { get; private set; }
+		public string IconPath { get; private set; } 
 		
-		public Player(string name, int maxHealth = 100, int attackPower = 10, int defense = 2)
+		public Player(string name, int maxHealth = 100, int attackPower = 10, int defense = 2, string iconPath = "")
 			: base(name, maxHealth, attackPower, defense)
 		{
 			Inventory = new Inventory(20);
@@ -26,6 +27,7 @@ namespace Appanet.Scripts.Models
 			EquippedWeapon = null;
 			EquippedArmor = null;
 			Money = 50;
+			IconPath = iconPath;
 			
 			UnlockAbility(new StreetLightsComingOn());
 			UnlockAbility(new StaticBurst());

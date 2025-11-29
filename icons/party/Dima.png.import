@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ch53uj3jyt8kx"
-path="res://.godot/imported/knife.png-8495d9e1895b4d35a4d7316e03258d15.ctex"
+uid="uid://b1c7wxekei2ei"
+path="res://.godot/imported/Dima.png-0aefc557814d5f40b755beb6702a6013.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icons/weapons/knife.png"
-dest_files=["res://.godot/imported/knife.png-8495d9e1895b4d35a4d7316e03258d15.ctex"]
+source_file="res://icons/party/Dima.png"
+dest_files=["res://.godot/imported/Dima.png-0aefc557814d5f40b755beb6702a6013.ctex"]
 
 [params]
 

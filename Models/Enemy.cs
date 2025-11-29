@@ -12,12 +12,14 @@ namespace Appanet.Scripts.Models
 		public int MaxMoneyDrop { get; private set; }
 		public EnemyType EnemyType { get; private set; }
 		public DamageType PrimaryDamageType { get; private set; }
+		public string IconPath { get; private set; }
 		private static Random _random = new Random();
 		
 		public Enemy(string name, int maxHealth, int attackPower, int defense, 
 					 int experienceReward = 25, int minMoney = 5, int maxMoney = 15,
 					 EnemyType enemyType = EnemyType.Normal,
-					 DamageType damageType = DamageType.Physical)
+					 DamageType damageType = DamageType.Physical,
+					 string iconPath = "")
 			: base(name, maxHealth, attackPower, defense)
 		{
 			ExperienceReward = experienceReward;
@@ -25,6 +27,7 @@ namespace Appanet.Scripts.Models
 			MaxMoneyDrop = maxMoney;
 			EnemyType = enemyType;
 			PrimaryDamageType = damageType;
+			IconPath = iconPath;
 		}
 		
 		public override int Attack()
@@ -66,7 +69,8 @@ namespace Appanet.Scripts.Models
 				20, 6, 1, 
 				10, 2, 8, 
 				EnemyType.Normal, 
-				DamageType.Electric
+				DamageType.Electric,
+				"res://icons/enemies/Barnwire_Possum.png"
 			);
 		}
 		
@@ -77,7 +81,8 @@ namespace Appanet.Scripts.Models
 				30, 8, 2, 
 				15, 5, 15, 
 				EnemyType.Tech, 
-				DamageType.Physical
+				DamageType.Physical,
+				"res://icons/enemies/Backroads_Gremlin.png"
 			);
 		}
 		
@@ -88,9 +93,10 @@ namespace Appanet.Scripts.Models
 				25, 7, 3, 
 				12, 4, 12, 
 				EnemyType.Spectral, 
-				DamageType.Curse
+				DamageType.Curse,
+				"res://icons/enemies/Skeleton_Keyer.png"
 			);
-			skeleton.Resistances.SetResistance(DamageType.Physical, 0.3f); // 30% physical resistance
+			skeleton.Resistances.SetResistance(DamageType.Physical, 0.3f);
 			return skeleton;
 		}
 		
@@ -103,9 +109,10 @@ namespace Appanet.Scripts.Models
 				40, 10, 3, 
 				25, 10, 30, 
 				EnemyType.Normal, 
-				DamageType.Physical
+				DamageType.Physical,
+				"res://icons/enemies/ridgerunner-howler.png"
 			);
-			howler.DodgeChance = 0.15f; // 15% dodge chance
+			howler.DodgeChance = 0.15f;
 			return howler;
 		}
 		
@@ -116,7 +123,8 @@ namespace Appanet.Scripts.Models
 				45, 11, 5, 
 				28, 20, 45, 
 				EnemyType.Normal, 
-				DamageType.Physical
+				DamageType.Physical,
+				"res://icons/enemies/Off-grid_Scavver.png"
 			);
 		}
 		
@@ -127,7 +135,8 @@ namespace Appanet.Scripts.Models
 				50, 12, 4, 
 				30, 15, 35, 
 				EnemyType.Normal, 
-				DamageType.Physical
+				DamageType.Physical,
+				"res://icons/enemies/bunkerbrute.png"
 			);
 		}
 		
@@ -138,9 +147,10 @@ namespace Appanet.Scripts.Models
 				70, 14, 6, 
 				40, 25, 50, 
 				EnemyType.Folklore, 
-				DamageType.Physical
+				DamageType.Physical,
+				"res://icons/enemies/Bridge_Troll.png"
 			);
-			troll.Resistances.SetResistance(DamageType.Physical, 0.2f); // 20% physical resistance
+			troll.Resistances.SetResistance(DamageType.Physical, 0.2f);
 			return troll;
 		}
 		
@@ -153,10 +163,11 @@ namespace Appanet.Scripts.Models
 				80, 16, 8, 
 				60, 40, 70, 
 				EnemyType.Spectral, 
-				DamageType.Curse
+				DamageType.Curse,
+				"res://icons/enemies/nightdialer.png"
 			);
-			dialer.Resistances.SetResistance(DamageType.Physical, 0.25f); // 25% physical resistance
-			dialer.Resistances.SetResistance(DamageType.Psychic, 0.5f);   // 50% psychic resistance
+			dialer.Resistances.SetResistance(DamageType.Physical, 0.25f);
+			dialer.Resistances.SetResistance(DamageType.Psychic, 0.5f);
 			return dialer;
 		}
 		
@@ -167,9 +178,10 @@ namespace Appanet.Scripts.Models
 				100, 18, 7, 
 				70, 50, 80, 
 				EnemyType.Folklore, 
-				DamageType.Physical
+				DamageType.Physical,
+				"res://icons/enemies/Horned_Serverman.png"
 			);
-			serverman.Resistances.SetResistance(DamageType.Curse, 0.3f); // 30% curse resistance
+			serverman.Resistances.SetResistance(DamageType.Curse, 0.3f);
 			return serverman;
 		}
 		
@@ -180,9 +192,10 @@ namespace Appanet.Scripts.Models
 				90, 17, 10, 
 				65, 45, 75, 
 				EnemyType.Normal, 
-				DamageType.Curse
+				DamageType.Curse,
+				"res://icons/enemies/Blackbadge_Enforcer.png"
 			);
-			enforcer.Resistances.SetResistance(DamageType.Physical, 0.4f); // 40% physical resistance (ceramic armor)
+			enforcer.Resistances.SetResistance(DamageType.Physical, 0.4f);
 			return enforcer;
 		}
 		
@@ -195,10 +208,11 @@ namespace Appanet.Scripts.Models
 				150, 25, 12, 
 				100, 80, 150, 
 				EnemyType.Folklore, 
-				DamageType.Electric
+				DamageType.Electric,
+				"res://icons/enemies/Thunder_Hollow_Wyrn.png"
 			);
-			wyrm.Resistances.SetResistance(DamageType.Physical, 0.3f);  // 30% physical resistance
-			wyrm.Resistances.SetResistance(DamageType.Electric, 0.5f);  // 50% electric resistance
+			wyrm.Resistances.SetResistance(DamageType.Physical, 0.3f);
+			wyrm.Resistances.SetResistance(DamageType.Electric, 0.5f);
 			return wyrm;
 		}
 		
@@ -209,11 +223,12 @@ namespace Appanet.Scripts.Models
 				120, 22, 15, 
 				120, 90, 160, 
 				EnemyType.Spectral, 
-				DamageType.Psychic
+				DamageType.Psychic,
+				"res://icons/enemies/Archivist_EchoVault.png"
 			);
-			archivist.Resistances.SetResistance(DamageType.Physical, 0.5f); // 50% physical resistance
-			archivist.Resistances.SetResistance(DamageType.Psychic, 0.6f);  // 60% psychic resistance
-			archivist.Resistances.SetResistance(DamageType.Curse, 0.7f);    // 70% curse resistance
+			archivist.Resistances.SetResistance(DamageType.Physical, 0.5f);
+			archivist.Resistances.SetResistance(DamageType.Psychic, 0.6f);
+			archivist.Resistances.SetResistance(DamageType.Curse, 0.7f);
 			return archivist;
 		}
 		
@@ -224,11 +239,12 @@ namespace Appanet.Scripts.Models
 				200, 30, 14, 
 				150, 100, 200, 
 				EnemyType.Spectral, 
-				DamageType.Curse
+				DamageType.Curse,
+				"res://icons/enemies/Director_BeneathNet.png"
 			);
-			director.Resistances.SetResistance(DamageType.Physical, 0.2f);  // 20% physical resistance
-			director.Resistances.SetResistance(DamageType.Spectral, 0.5f);  // 50% spectral resistance
-			director.Resistances.SetResistance(DamageType.Curse, 0.8f);     // 80% curse resistance
+			director.Resistances.SetResistance(DamageType.Physical, 0.2f);
+			director.Resistances.SetResistance(DamageType.Spectral, 0.5f);
+			director.Resistances.SetResistance(DamageType.Curse, 0.8f);
 			return director;
 		}
 	}

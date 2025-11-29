@@ -20,7 +20,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.34901962, 1, 1, 0.13725491)
+color = Color(0, 0, 0, 1)
 
 [node name="Title" type="Label" parent="."]
 layout_mode = 1
@@ -39,7 +39,7 @@ custom_minimum_size = Vector2(50, 80)
 layout_mode = 0
 offset_right = 1100.0
 offset_bottom = 300.0
-theme_override_constants/separation = 50
+theme_override_constants/separation = 100
 
 [node name="PlayerTeamPanel" type="VBoxContainer" parent="MainLayout"]
 custom_minimum_size = Vector2(500, 280)
@@ -55,9 +55,15 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_constants/separation = 10
 
+[node name="Spacer" type="Control" parent="MainLayout"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="EnemyTeamPanel" type="VBoxContainer" parent="MainLayout"]
 custom_minimum_size = Vector2(500, 280)
 layout_mode = 2
+theme_override_constants/separation = 1
 
 [node name="EnemyTeamTitle" type="Label" parent="MainLayout/EnemyTeamPanel"]
 layout_mode = 2
@@ -68,14 +74,14 @@ horizontal_alignment = 1
 
 [node name="EnemyTeam" type="VBoxContainer" parent="MainLayout/EnemyTeamPanel"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 3
 
 [node name="CombatLog" type="RichTextLabel" parent="."]
 layout_mode = 0
-offset_left = 542.0
-offset_top = 324.0
-offset_right = 1056.0
-offset_bottom = 521.0
+offset_left = 10.0
+offset_top = 493.0
+offset_right = 370.0
+offset_bottom = 627.0
 theme_override_styles/normal = SubResource("StyleBoxFlat_o70s7")
 bbcode_enabled = true
 text = "combat log

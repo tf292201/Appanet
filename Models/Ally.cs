@@ -8,12 +8,15 @@ namespace Appanet.Scripts.Models
 		public string AllyID { get; private set; }
 		public Inventory Inventory { get; private set; }
 		public Weapon EquippedWeapon { get; private set; }
+		public string IconPath { get; private set; }
 		
-		public Ally(string id, string name, int maxHealth, int attackPower, int defense)
+		
+		public Ally(string id, string name, int maxHealth, int attackPower, int defense, string iconPath = "")
 			: base(name, maxHealth, attackPower, defense)
 		{
 			AllyID = id;
 			Inventory = new Inventory(10);
+			IconPath = iconPath;
 		}
 		
 		// EQUIPMENT METHODS
@@ -86,7 +89,8 @@ namespace Appanet.Scripts.Models
 				"Michael Webb",
 				80,
 				12,
-				4
+				4,
+				"res://icons/party/MichaelWeb.png" 
 			);
 			
 			michael.UnlockAbility(new MKUltraMemoryScramble());
@@ -101,7 +105,8 @@ namespace Appanet.Scripts.Models
 				"Dima Volkov",
 				70,
 				8,
-				6
+				6,
+				"res://icons/party/Dima.png" 
 			);
 			return dima;
 		}
@@ -109,11 +114,12 @@ namespace Appanet.Scripts.Models
 		public static Ally CreateCase()
 		{
 			var case_ally = new Ally(
-				"case",
-				"Casey Whitmore",
+				"cass",
+				"Cassie Whitmore",
 				90,
 				14,
-				3
+				3,
+				"res://icons/party/Cassie.png" 
 			);
 			case_ally.DodgeChance = 0.15f;
 			

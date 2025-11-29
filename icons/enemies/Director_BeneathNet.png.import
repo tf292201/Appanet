@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ch53uj3jyt8kx"
-path="res://.godot/imported/knife.png-8495d9e1895b4d35a4d7316e03258d15.ctex"
+uid="uid://3fprt7hfx574"
+path="res://.godot/imported/Director_BeneathNet.png-367615690ead5c2af0cd2b54188e5953.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icons/weapons/knife.png"
-dest_files=["res://.godot/imported/knife.png-8495d9e1895b4d35a4d7316e03258d15.ctex"]
+source_file="res://icons/enemies/Director_BeneathNet.png"
+dest_files=["res://.godot/imported/Director_BeneathNet.png-367615690ead5c2af0cd2b54188e5953.ctex"]
 
 [params]
 

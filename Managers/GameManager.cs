@@ -21,7 +21,7 @@ namespace Appanet.Scripts.Managers
 		
 		public void InitializeNewGame()
 {
-	Player = new Player("Investigator", 100, 10, 3);
+	Player = new Player("Investigator", 100, 10, 3, "res://icons/party/Investigator.png");
 
 	// Add starting weapons
 	var baseballBat = Weapon.CreateBaseballBat();

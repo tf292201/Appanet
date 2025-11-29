@@ -496,7 +496,76 @@ private void UpdateTeamDisplay(VBoxContainer container, List<CombatParticipant> 
 	foreach (var member in team)
 	{
 		var panel = new PanelContainer();
-		var vbox = new VBoxContainer();
+		
+		// Make panel transparent
+		var panelStyle = new StyleBoxFlat();
+		panelStyle.BgColor = new Color(0, 0, 0, 0); // Fully transparent
+		panel.AddThemeStyleboxOverride("panel", panelStyle);
+		
+		// Determine layout based on whether we have a sprite
+		Container mainContainer;
+		string iconPath = "";
+		bool hasSprite = false;
+		
+		// Check for enemy sprite
+		if (!isPlayerTeam && member.Character is Enemy enemy && !string.IsNullOrEmpty(enemy.IconPath))
+		{
+			iconPath = enemy.IconPath;
+			hasSprite = true;
+		}
+		// Check for player sprite
+		else if (isPlayerTeam && member.Character is Player player && !string.IsNullOrEmpty(player.IconPath))
+		{
+			iconPath = player.IconPath;
+			hasSprite = true;
+		}
+		// Check for ally sprite
+		else if (isPlayerTeam && member.Character is Ally ally && !string.IsNullOrEmpty(ally.IconPath))
+		{
+			iconPath = ally.IconPath;
+			hasSprite = true;
+		}
+		
+		// If we have a sprite, use horizontal layout with sprite on left
+		if (hasSprite)
+		{
+			mainContainer = new HBoxContainer();
+			((HBoxContainer)mainContainer).AddThemeConstantOverride("separation", 10);
+			
+			// Add sprite on the left
+			var iconTexture = GD.Load<Texture2D>(iconPath);
+			if (iconTexture != null)
+			{
+				var textureRect = new TextureRect();
+				textureRect.Texture = iconTexture;
+				textureRect.ExpandMode = TextureRect.ExpandModeEnum.FitWidth;
+				textureRect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+				textureRect.CustomMinimumSize = new Vector2(128, 128);
+				
+				// Gray out if defeated
+				if (!member.IsAlive)
+				{
+					textureRect.Modulate = new Color(0.3f, 0.3f, 0.3f, 0.6f);
+				}
+				
+				mainContainer.AddChild(textureRect);
+			}
+		}
+		else
+		{
+			// No sprite - use vertical layout
+			mainContainer = new VBoxContainer();
+			
+			// Constrain width for player team without sprites
+			if (isPlayerTeam)
+			{
+				panel.CustomMinimumSize = new Vector2(320, 0);
+				panel.SizeFlagsHorizontal = Control.SizeFlags.ShrinkBegin;
+			}
+		}
+		
+		// Stats VBox (goes beside sprite, or is the main container if no sprite)
+		var statsVbox = new VBoxContainer();
 		
 		// Add defeated indicator if not alive
 		if (!member.IsAlive)
@@ -505,7 +574,7 @@ private void UpdateTeamDisplay(VBoxContainer container, List<CombatParticipant> 
 			defeatedLabel.Text = "💀 DEFEATED";
 			defeatedLabel.AddThemeFontSizeOverride("font_size", 12);
 			defeatedLabel.AddThemeColorOverride("font_color", new Color(0.8f, 0.2f, 0.2f));
-			vbox.AddChild(defeatedLabel);
+			statsVbox.AddChild(defeatedLabel);
 		}
 		
 		// Name label
@@ -522,63 +591,81 @@ private void UpdateTeamDisplay(VBoxContainer container, List<CombatParticipant> 
 			nameLabel.AddThemeColorOverride("font_color", 
 				isPlayerTeam ? new Color(0.5f, 1f, 0.5f) : new Color(1f, 0.5f, 0.5f));
 		}
-		vbox.AddChild(nameLabel);
+		statsVbox.AddChild(nameLabel);
 		
-		// HP label
-		var hpLabel = new Label();
+		// HP Progress Bar with fixed width
+		var hpBar = new ProgressBar();
+		hpBar.MinValue = 0;
+		hpBar.MaxValue = member.Character.MaxHealth;
+		hpBar.Value = member.Character.Health;
+		hpBar.CustomMinimumSize = new Vector2(150, 20);
+		hpBar.ShowPercentage = false;
+		hpBar.SizeFlagsHorizontal = Control.SizeFlags.ShrinkBegin;
+		
+		// Color the HP bar based on health percentage
 		float hpPercent = (float)member.Character.Health / member.Character.MaxHealth;
-		Color hpColor = hpPercent > 0.5f ? new Color(0, 1, 0) : 
-					   hpPercent > 0.25f ? new Color(1, 1, 0) : 
-					   new Color(1, 0, 0);
-		
-		// Gray out HP if defeated
+		Color hpColor;
+		if (hpPercent > 0.5f)
+			hpColor = new Color(0, 1, 0); // Green
+		else if (hpPercent > 0.25f)
+			hpColor = new Color(1, 1, 0); // Yellow
+		else
+			hpColor = new Color(1, 0, 0); // Red
+
+		// Gray out if defeated
 		if (!member.IsAlive)
 		{
 			hpColor = new Color(0.5f, 0.5f, 0.5f);
 		}
-		
-		hpLabel.Text = $"HP: {member.Character.Health}/{member.Character.MaxHealth}";
-		hpLabel.AddThemeColorOverride("font_color", hpColor);
-		vbox.AddChild(hpLabel);
-		
-		// Get equipment info
-		// Get equipment info
-int baseAtk = member.Character.AttackPower;
-int baseDef = member.Character.Defense;
-int weaponBonus = 0;
-int armorBonus = 0;
-string weaponName = "";
-string armorName = "";
 
-// Check if this is a Player
-if (member.Character is Player)
-{
-	Player player = (Player)member.Character;
-	if (player.EquippedWeapon != null)
-	{
-		weaponBonus = player.EquippedWeapon.AttackBonus;
-		weaponName = player.EquippedWeapon.Name;
-	}
-	if (player.EquippedArmor != null)
-	{
-		armorBonus = player.EquippedArmor.DefenseBonus;
-		armorName = player.EquippedArmor.Name;
-	}
-}
-else if (member.Character is Ally)
-{
-	Ally ally = (Ally)member.Character;
-	if (ally.EquippedWeapon != null)
-	{
-		weaponBonus = ally.EquippedWeapon.AttackBonus;
-		weaponName = ally.EquippedWeapon.Name;
-	}
-	if (ally.EquippedArmor != null)
-	{
-		armorBonus = ally.EquippedArmor.DefenseBonus;
-		armorName = ally.EquippedArmor.Name;
-	}
-}
+		var hpBarStyle = new StyleBoxFlat();
+		hpBarStyle.BgColor = hpColor;
+		hpBar.AddThemeStyleboxOverride("fill", hpBarStyle);
+
+		// Add a dark background to the unfilled portion
+		var hpBarBg = new StyleBoxFlat();
+		hpBarBg.BgColor = new Color(0.2f, 0.2f, 0.2f, 1);
+		hpBar.AddThemeStyleboxOverride("background", hpBarBg);
+
+		statsVbox.AddChild(hpBar);
+		
+		// Get equipment info
+		int baseAtk = member.Character.AttackPower;
+		int baseDef = member.Character.Defense;
+		int weaponBonus = 0;
+		int armorBonus = 0;
+		string weaponName = "";
+		string armorName = "";
+
+		// Check if this is a Player
+		if (member.Character is Player)
+		{
+			Player player = (Player)member.Character;
+			if (player.EquippedWeapon != null)
+			{
+				weaponBonus = player.EquippedWeapon.AttackBonus;
+				weaponName = player.EquippedWeapon.Name;
+			}
+			if (player.EquippedArmor != null)
+			{
+				armorBonus = player.EquippedArmor.DefenseBonus;
+				armorName = player.EquippedArmor.Name;
+			}
+		}
+		else if (member.Character is Ally)
+		{
+			Ally ally = (Ally)member.Character;
+			if (ally.EquippedWeapon != null)
+			{
+				weaponBonus = ally.EquippedWeapon.AttackBonus;
+				weaponName = ally.EquippedWeapon.Name;
+			}
+			if (ally.EquippedArmor != null)
+			{
+				armorBonus = ally.EquippedArmor.DefenseBonus;
+				armorName = ally.EquippedArmor.Name;
+			}
+		}
 		
 		// Stats label with dynamic attack and defense
 		var statsLabel = new Label();
@@ -598,7 +685,7 @@ else if (member.Character is Ally)
 			statsLabel.AddThemeColorOverride("font_color", new Color(0.5f, 0.5f, 0.5f));
 		}
 		
-		vbox.AddChild(statsLabel);
+		statsVbox.AddChild(statsLabel);
 		
 		// Weapon label (if equipped)
 		if (!string.IsNullOrEmpty(weaponName))
@@ -608,7 +695,7 @@ else if (member.Character is Ally)
 			weaponLabel.AddThemeFontSizeOverride("font_size", 10);
 			weaponLabel.AddThemeColorOverride("font_color", 
 				member.IsAlive ? new Color(0.8f, 0.8f, 0.5f) : new Color(0.5f, 0.5f, 0.5f));
-			vbox.AddChild(weaponLabel);
+			statsVbox.AddChild(weaponLabel);
 		}
 		
 		// Armor label (if equipped)
@@ -619,7 +706,7 @@ else if (member.Character is Ally)
 			armorLabel.AddThemeFontSizeOverride("font_size", 10);
 			armorLabel.AddThemeColorOverride("font_color", 
 				member.IsAlive ? new Color(0.5f, 0.7f, 0.9f) : new Color(0.5f, 0.5f, 0.5f));
-			vbox.AddChild(armorLabel);
+			statsVbox.AddChild(armorLabel);
 		}
 		
 		// Show defending status (only if alive)
@@ -629,8 +716,11 @@ else if (member.Character is Ally)
 			defendingLabel.Text = "🛡️ DEFENDING";
 			defendingLabel.AddThemeFontSizeOverride("font_size", 10);
 			defendingLabel.AddThemeColorOverride("font_color", new Color(0.5f, 0.8f, 1f));
-			vbox.AddChild(defendingLabel);
+			statsVbox.AddChild(defendingLabel);
 		}
+		
+		// Add statsVbox to main container
+		mainContainer.AddChild(statsVbox);
 		
 		// Highlight if this actor is selecting (only if alive)
 		if (member == _currentActorSelecting && member.IsAlive)
@@ -644,7 +734,7 @@ else if (member.Character is Ally)
 			panel.Modulate = new Color(0.6f, 0.6f, 0.6f, 0.8f);
 		}
 		
-		panel.AddChild(vbox);
+		panel.AddChild(mainContainer);
 		container.AddChild(panel);
 	}
 }
