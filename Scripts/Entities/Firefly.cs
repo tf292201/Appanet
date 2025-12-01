@@ -40,7 +40,7 @@ public partial class Firefly : Sprite2D
 	private ImageTexture CreateFireflyTexture()
 	{
 		// Make it bigger and blockier - 16x16 instead of 8x8
-		var img = Image.Create(16, 16, false, Image.Format.Rgba8);
+		var img = Image.CreateEmpty(16, 16, false, Image.Format.Rgba8);
 		var yellow = new Color(1.0f, 0.9f, 0.3f, 1.0f);
 		var darkYellow = new Color(0.8f, 0.7f, 0.2f, 1.0f);
 		

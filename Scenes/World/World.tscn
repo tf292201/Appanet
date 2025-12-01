@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3 uid="uid://gs26exnngdvy"]
+
+[ext_resource type="PackedScene" uid="uid://ct4gfnds64mwf" path="res://Scenes/World/PlayerCharacter.tscn" id="1_27jhl"]
+[ext_resource type="Script" uid="uid://cqxa68bdgat5g" path="res://Scripts/World/PlayerController.cs" id="2_27jhl"]
+[ext_resource type="PackedScene" uid="uid://cxx3nulwafx1n" path="res://Scenes/World/EnemySprite.tscn" id="2_hveh7"]
+[ext_resource type="PackedScene" uid="uid://c33njklpsx3n3" path="res://Scenes/World/WorldUI.tscn" id="4_kjd5s"]
+[ext_resource type="Script" uid="uid://djftsupn7mkdq" path="res://Scripts/World/WorldManager.cs" id="5_p7pgw"]
+
+[node name="World" type="Node2D"]
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_left = -1000.0
+offset_top = -1000.0
+offset_right = 1000.0
+offset_bottom = 1000.0
+color = Color(0.2, 0.3, 0.2, 1)
+
+[node name="PlayerCharacter" parent="." instance=ExtResource("1_27jhl")]
+position = Vector2(486, 402)
+script = ExtResource("2_27jhl")
+Speed = 200.0
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="EnemySprite" parent="Enemies" instance=ExtResource("2_hveh7")]
+position = Vector2(101, 138)
+
+[node name="EnemySprite2" parent="Enemies" instance=ExtResource("2_hveh7")]
+position = Vector2(341, 58)
+EnemyType = "BarnWirePossum"
+
+[node name="EnemySprite3" parent="Enemies" instance=ExtResource("2_hveh7")]
+position = Vector2(667, 85)
+EnemyType = "OffGridScavver"
+
+[node name="WorldUi" parent="." instance=ExtResource("4_kjd5s")]
+
+[node name="WorldManager" type="Node" parent="."]
+script = ExtResource("5_p7pgw")

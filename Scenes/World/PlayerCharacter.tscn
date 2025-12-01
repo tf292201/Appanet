@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3 uid="uid://ct4gfnds64mwf"]
+
+[ext_resource type="Script" uid="uid://bq8jdf42d61wk" path="res://Scripts/World/PlayerCharacter.cs" id="1_2e1f2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wdida"]
+
+[node name="PlayerCharacter" type="CharacterBody2D"]
+motion_mode = 1
+wall_min_slide_angle = 0.0052359877
+script = ExtResource("1_2e1f2")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+offset = Vector2(0, -16)
+
+[node name="ColorRect" type="ColorRect" parent="Sprite2D"]
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+color = Color(0.9490196, 0.36862746, 0, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(1, 1)
+scale = Vector2(2, 2)
+shape = SubResource("RectangleShape2D_wdida")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(11, 14)
+limit_enabled = false
+position_smoothing_enabled = true

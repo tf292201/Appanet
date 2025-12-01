@@ -46,7 +46,7 @@ namespace Appanet.Scripts.Models
 			return false;
 		}
 		
-		public Item? GetItem(string itemName)
+		public Item GetItem(string itemName)
 		{
 			return _items.FirstOrDefault(i => 
 				i.Name.Equals(itemName, StringComparison.OrdinalIgnoreCase));

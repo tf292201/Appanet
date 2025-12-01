@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3 uid="uid://cxx3nulwafx1n"]
+
+[ext_resource type="Script" uid="uid://cwu8hsrn3dwyo" path="res://Scripts/World/EnemySprite.cs" id="1_ro8ry"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ro8ry"]
+
+[node name="EnemySprite" type="Area2D"]
+script = ExtResource("1_ro8ry")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(1, 0.003921569, 0.03137255, 1)
+
+[node name="ColorRect" type="ColorRect" parent="Sprite2D"]
+offset_right = 32.0
+offset_bottom = 32.0
+color = Color(1, 0, 1, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(10, 16)
+scale = Vector2(2, 2)
+shape = SubResource("RectangleShape2D_ro8ry")

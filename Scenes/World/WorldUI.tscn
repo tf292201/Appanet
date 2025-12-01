@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://c33njklpsx3n3"]
+
+[ext_resource type="Script" uid="uid://dbi1p6afg7gp0" path="res://Scripts/World/WorldUI.cs" id="1_lj3vs"]
+
+[node name="WorldUi" type="CanvasLayer"]
+script = ExtResource("1_lj3vs")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TopBar" type="Panel" parent="Control"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HPLabel" type="Label" parent="Control/TopBar"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = 108.0
+offset_bottom = 33.0
+text = "HP 100/100"
+
+[node name="MoneyLabel" type="Label" parent="Control/TopBar"]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 10.0
+offset_right = 240.0
+offset_bottom = 33.0
+text = "$50"
+
+[node name="MenuButton" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 10.0
+offset_right = 572.0
+offset_bottom = 41.0
+text = "Menu [i]"

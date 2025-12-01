@@ -175,7 +175,7 @@ namespace Appanet.Scripts.Models.Characters
 			return ActiveStatusEffects.Any(se => se.Effect == effect);
 		}
 		
-		public StatusEffectInstance? GetStatusEffect(StatusEffect effect)
+		public StatusEffectInstance GetStatusEffect(StatusEffect effect)
 		{
 			return ActiveStatusEffects.FirstOrDefault(se => se.Effect == effect);
 		}
