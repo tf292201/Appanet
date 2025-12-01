@@ -1,9 +1,10 @@
 using Godot;
-using Appanet.Scripts.Models;
+using Appanet.Scripts.Models.Characters;  
+using Appanet.Scripts.Models.Items;       
 using System.Linq; 
 using System.Collections.Generic;
 
-namespace Appanet.Scripts.Managers
+namespace Appanet.Managers
 {
 	public partial class GameManager : Node
 	{
@@ -21,7 +22,7 @@ namespace Appanet.Scripts.Managers
 		
 		public void InitializeNewGame()
 {
-	Player = new Player("Investigator", 100, 10, 3, "res://icons/party/Investigator.png");
+	Player = new Player("Investigator", 100, 10, 3, "res://Assets/Icons/party/Investigator.png");
 
 	// Add starting weapons
 	var baseballBat = Weapon.CreateBaseballBat();

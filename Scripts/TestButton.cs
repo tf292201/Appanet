@@ -1,6 +1,6 @@
 using Godot;
 using Appanet.Scripts.Models;
-using Appanet.Scripts.Managers;
+using Appanet.Managers;
 
 public partial class TestButton : Button
 {

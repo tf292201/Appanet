@@ -11,9 +11,8 @@ config_version=5
 [application]
 
 config/name="Appanet"
-run/main_scene="uid://dp7y6rselpufs"
+run/main_scene="uid://coy1jmbau3as8"
 config/features=PackedStringArray("4.5", "C#", "Mobile")
-config/icon="res://icon.svg"
 
 [autoload]
 

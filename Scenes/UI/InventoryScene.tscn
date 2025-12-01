@@ -1,6 +1,6 @@
-[gd_scene load_steps=29 format=3 uid="uid://b5wgpnweu01bu"]
+[gd_scene load_steps=29 format=3 uid="uid://dkerqjxtwsokm"]
 
-[ext_resource type="Script" path="res://InventorySceneController.cs" id="1_bjrb0"]
+[ext_resource type="Script" uid="uid://drrdgkhovrtxg" path="res://Scripts/UI/InventorySceneController.cs" id="1_yn8e5"]
 
 [sub_resource type="SystemFont" id="SystemFont_bjrb0"]
 font_names = PackedStringArray("BoldPixels")
@@ -139,7 +139,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_bjrb0")
+script = ExtResource("1_yn8e5")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1

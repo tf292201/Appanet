@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://dy1nxooc10rrr"]
+[gd_scene load_steps=2 format=3 uid="uid://c2uhurxcelu7v"]
 
-[ext_resource type="Script" uid="uid://cnatnuhbudpjf" path="res://Firefly.cs" id="1_a1sq8"]
+[ext_resource type="Script" path="res://Firefly.cs" id="1_a1sq8"]
 
 [node name="Firefly" type="Sprite2D"]
 script = ExtResource("1_a1sq8")

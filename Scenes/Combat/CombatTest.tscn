@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://0dr1tfgt08if"]
+[gd_scene load_steps=3 format=3 uid="uid://coy1jmbau3as8"]
 
-[ext_resource type="Script" path="res://CombatTestController.cs" id="1_oehq7"]
+[ext_resource type="Script" uid="uid://8bvutd0syfi5" path="res://Scripts/Combat/CombatTestController.cs" id="1_oehq7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o70s7"]
 bg_color = Color(0.30980393, 0.30980393, 0.5921569, 1)
