@@ -13,7 +13,7 @@ public partial class Opening : Control
 	public override void _Ready()
 	{
 		// Load firefly scene
-		fireflyScene = GD.Load<PackedScene>("res://Firefly.tscn");
+		fireflyScene = GD.Load<PackedScene>("res://Scenes/Entities/Firefly.tscn");
 		
 		// Get node references (or use [Export] and assign in editor)
 		quoteText = GetNode<Label>("QuoteText");

@@ -1,8 +1,8 @@
 using Godot;
-using Appanet.Scripts.Models.Characters;      // ← CHANGED: For Player, Ally, Character
-using Appanet.Scripts.Models.Items;           // ← ADD: For Weapon, Armor, Consumable, Item
-using Appanet.Scripts.Models;                 // ← ADD: For Inventory (it's still in Models root)
-using Appanet.Managers;               // ← KEEP: For GameManager
+using Appanet.Scripts.Models.Characters;     
+using Appanet.Scripts.Models.Items;          
+using Appanet.Scripts.Models;             
+using Appanet.Managers;      
 using System.Collections.Generic;
 using System.Linq;
 

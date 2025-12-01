@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://csb0mongqnhh7"]
+[gd_scene load_steps=2 format=3 uid="uid://csb0mongqnhh7"]
 
 [ext_resource type="Script" uid="uid://cy7e8381h6761" path="res://Scripts/UI/Opening.cs" id="1_idx68"]
-[ext_resource type="Texture2D" path="res://icons/StartBackground.png" id="2_idx68"]
 
 [node name="Opening" type="Control"]
 layout_mode = 3
@@ -56,7 +55,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_idx68")
 expand_mode = 1
 
 [node name="MenuButtons" type="VBoxContainer" parent="MenuScreen"]
