@@ -321,6 +321,81 @@ public bool AllPlayersHaveActed()
 	return _actorsWhoActedThisTurn.Count >= PlayerTeam.Count(p => p.IsAlive);
 }
 
+// NEW - Execute flee attempt
+public bool AttemptFlee()
+{
+	Log("");
+	Log("🏃 Your party attempts to flee!");
+	
+	// Fleeing always succeeds, but enemies get one free attack round
+	Log("The enemies get one final attack as you retreat...");
+	Log("");
+	
+	// Execute one round of enemy attacks
+	var aliveEnemies = EnemyTeam.Where(e => e.IsAlive).ToList();
+	var aliveAllies = PlayerTeam.Where(p => p.IsAlive).ToList();
+	
+	foreach (var enemy in aliveEnemies)
+	{
+		if (aliveAllies.Count == 0) break;
+		
+		var target = aliveAllies[GD.RandRange(0, aliveAllies.Count - 1)];
+		
+		AttackResult attackResult = enemy.Character.AttackWithResult();
+		DamageResult damageResult = target.Character.TakeDamageWithResult(
+			attackResult.Damage,
+			attackResult.DamageType
+		);
+		
+		if (damageResult.WasDodged)
+		{
+			Log($"💨 {target.GetDisplayName()} DODGED {enemy.GetDisplayName()}'s attack!");
+		}
+		else
+		{
+			string critText = attackResult.IsCritical ? " [CRITICAL HIT!]" : "";
+			string damageTypeText = attackResult.DamageType != DamageType.Physical 
+				? $" ({attackResult.DamageType})" 
+				: "";
+			
+			Log($"💥 {enemy.GetDisplayName()} attacks {target.GetDisplayName()} for {damageResult.DamageTaken} damage{damageTypeText}{critText}!");
+			
+			if (!target.IsAlive)
+			{
+				Log($"💀 {target.GetDisplayName()} has been defeated!");
+			}
+		}
+		
+		// Update alive allies list
+		aliveAllies = PlayerTeam.Where(p => p.IsAlive).ToList();
+	}
+	
+	Log("");
+	Log("=== FLED FROM COMBAT ===");
+	
+	// Check if anyone died during flee
+	bool anyoneSurvived = PlayerTeam.Any(p => p.IsAlive);
+	
+	if (!anyoneSurvived)
+	{
+		// Everyone died trying to flee
+		IsCombatOver = true;
+		WinningTeam = Team.Enemy;
+		CurrentPhase = TurnPhase.CombatEnd;
+		OnPhaseChange?.Invoke(CurrentPhase);
+		OnCombatEnd?.Invoke(Team.Enemy);
+		return false; // Flee failed (TPK)
+	}
+	
+	// Flee succeeded
+	IsCombatOver = true;
+	WinningTeam = Team.Player; // Technically escaped, not "won"
+	CurrentPhase = TurnPhase.CombatEnd;
+	OnPhaseChange?.Invoke(CurrentPhase);
+	
+	return true; // Flee succeeded
+}
+
 public void StartEnemyTurn()
 {
 	if (IsCombatOver) return;

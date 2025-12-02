@@ -11,55 +11,62 @@ namespace Appanet.Scripts.World
 		private PlayerController _player;
 		private bool _isInMenu = false;
 		
-		// Track defeated enemies (cleared on scene reload or save)
-		private HashSet<string> _defeatedEnemies = new HashSet<string>();
-		
-		// Store pending combat info
-		private string _pendingEnemyType;
-		private string _pendingEnemyID;
-		
 		public override void _Ready()
 {
 	Instance = this;
 	
-	// Find PlayerCharacter - try different paths
+	GD.Print("===== WorldManager _Ready() =====");
+	
+	// Find PlayerCharacter
 	_player = GetNodeOrNull<PlayerController>("../PlayerCharacter");
 	
 	if (_player == null)
 	{
-		// Try alternative path
+		var parent = GetParent();
+		if (parent != null)
+		{
+			_player = parent.GetNodeOrNull<PlayerController>("PlayerCharacter");
+		}
+	}
+	
+	if (_player == null)
+	{
 		_player = GetTree().Root.GetNodeOrNull<PlayerController>("World/PlayerCharacter");
 	}
 	
 	if (_player == null)
 	{
-		GD.PrintErr("ERROR: Could not find PlayerCharacter!");
+		GD.PrintErr("❌ ERROR: Could not find PlayerCharacter!");
 	}
 	else
 	{
 		GD.Print($"✅ WorldManager found PlayerCharacter at: {_player.GetPath()}");
 	}
 	
-	// Check if returning from combat
+	// Check if returning from combat (just for logging, enemies already marked)
 	if (GetTree().Root.HasMeta("returning_from_combat"))
 	{
-		bool playerWon = (bool)GetTree().Root.GetMeta("returning_from_combat");
-		
-		if (playerWon && GetTree().Root.HasMeta("defeated_enemy_id"))
-		{
-			string enemyID = (string)GetTree().Root.GetMeta("defeated_enemy_id");
-			MarkEnemyDefeated(enemyID);
-			GetTree().Root.RemoveMeta("defeated_enemy_id");
-		}
-		
+		GD.Print("✅ Returned from combat - enemies already marked as defeated");
 		GetTree().Root.RemoveMeta("returning_from_combat");
+		
+		// Clean up old metadata (no longer needed)
+		if (GetTree().Root.HasMeta("combat_enemy_id"))
+		{
+			GetTree().Root.RemoveMeta("combat_enemy_id");
+		}
+		if (GetTree().Root.HasMeta("combat_enemy_type"))
+		{
+			GetTree().Root.RemoveMeta("combat_enemy_type");
+		}
 	}
+	
+	GD.Print("===== WorldManager _Ready() Complete =====");
 }
 		
 		public override void _Input(InputEvent @event)
 		{
-			// Open inventory with Tab or I
-			if (@event.IsActionPressed("ui_cancel") || Input.IsKeyPressed(Key.I))
+			// Open inventory with I key
+			if (@event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.I)
 			{
 				if (!_isInMenu)
 				{
@@ -79,29 +86,22 @@ namespace Appanet.Scripts.World
 		{
 			GD.Print($"Starting combat with: {enemyType} (ID: {enemyID})");
 			
-			// Store enemy info in root for CombatTestController to access
+			// Store enemy info for CombatTestController
 			GetTree().Root.SetMeta("combat_enemy_type", enemyType);
 			GetTree().Root.SetMeta("combat_enemy_id", enemyID);
 			
 			GetTree().ChangeSceneToFile("res://Scenes/Combat/CombatTest.tscn");
 		}
 		
+		// Forward to GameManager
 		public void MarkEnemyDefeated(string enemyID)
 		{
-			_defeatedEnemies.Add(enemyID);
-			GD.Print($"Enemy defeated: {enemyID} (Total defeated: {_defeatedEnemies.Count})");
+			GameManager.Instance?.MarkEnemyDefeated(enemyID);
 		}
 		
 		public bool IsEnemyDefeated(string enemyID)
 		{
-			return _defeatedEnemies.Contains(enemyID);
-		}
-		
-		public void ReturnToWorld()
-		{
-			_isInMenu = false;
-			if (_player != null)
-				_player.SetInputEnabled(true);
+			return GameManager.Instance?.IsEnemyDefeated(enemyID) ?? false;
 		}
 	}
 }

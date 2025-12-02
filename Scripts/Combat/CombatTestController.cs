@@ -12,6 +12,8 @@ namespace Appanet.Scripts.Combat
 	{
 		private CombatState _combat;
 		private CombatParticipant _currentActorSelecting;
+		private string _enemyTypeOverride = null;
+		private bool IsCombatOver => _combat?.IsCombatOver ?? false;
 		
 		// UI references
 		private VBoxContainer _playerTeamUI;
@@ -42,6 +44,7 @@ namespace Appanet.Scripts.Combat
 			_specialBtn = GetNode<Button>("../ActionButtons/SpecialBtn");
 			_targetSelection = GetNode<VBoxContainer>("../TargetSelection");
 			_equipBtn = GetNode<Button>("../ActionButtons/EquipBtn");
+			var _fleeBtn = GetNode<Button>("../ActionButtons/FleeBtn"); 
 			
 			
 			// Create turn indicator label
@@ -59,6 +62,7 @@ namespace Appanet.Scripts.Combat
 			_defendBtn.Pressed += OnDefendButtonPressed; 
 			_specialBtn.Pressed += OnSpecialButtonPressed; 
 			_equipBtn.Pressed += OnManageEquipmentPressed;
+			_fleeBtn.Pressed += OnFleeButtonPressed; 
 			
 			
 			InitializeCombat();
@@ -78,50 +82,72 @@ private void InitializeCombat()
 {
 	_combat = new CombatState();
 	
-	// Add player with armor
+	// Add player
 	var player = GameManager.Instance.Player;
-	var playerArmor = Armor.CreateLeatherJacket();  // Starting armor
-	player.Inventory.AddItem(playerArmor);
-	player.EquipArmor(playerArmor);
 	_combat.AddPlayerCharacter(player);
 	
-	// Michael with weapon and armor
-	var michael = Ally.CreateMichaelWebb();
-	var michaelWeapon = Weapon.CreateMagliteFlashlight();
-	var michaelArmor = Armor.CreateFlannel();
-	michael.Inventory.AddItem(michaelWeapon);
-	michael.Inventory.AddItem(michaelArmor);
-	michael.EquipWeapon(michaelWeapon);
-	michael.EquipArmor(michaelArmor);
-	_combat.AddAlly(michael, "michael");
-	GameManager.Instance.AddAllyToParty(michael);
+	// Add all party members
+	foreach (var ally in GameManager.Instance.PartyMembers)
+	{
+		var allyId = ally is Ally a ? a.AllyID : "unknown";
+		_combat.AddAlly(ally, allyId);
+	}
 	
-	// Casey with weapon and armor
-	var casey = Ally.CreateCase();
-	var caseyWeapon = Weapon.CreateTireIron();
-	var caseyArmor = Armor.CreateFlannel();
-	casey.Inventory.AddItem(caseyWeapon);
-	casey.Inventory.AddItem(caseyArmor);
-	casey.EquipWeapon(caseyWeapon);
-	casey.EquipArmor(caseyArmor);
-	_combat.AddAlly(casey, "case");
-	GameManager.Instance.AddAllyToParty(casey);
+	// ✅ CHECK FOR OVERWORLD ENEMY
+	if (GetTree().Root.HasMeta("combat_enemy_type"))
+	{
+		_enemyTypeOverride = (string)GetTree().Root.GetMeta("combat_enemy_type");
+		GetTree().Root.RemoveMeta("combat_enemy_type");
+		GD.Print($"🎯 Loading specific enemy from overworld: {_enemyTypeOverride}");
+	}
 	
-	// Add enemies
-	_combat.AddEnemy(Enemy.CreateBackroadsGremmlin());
-	_combat.AddEnemy(Enemy.CreateBarnWirePossum());
-	_combat.AddEnemy(Enemy.CreateOffGridScavver());
+	// ✅ ADD ENEMY BASED ON OVERRIDE OR DEFAULT
+	if (_enemyTypeOverride != null)
+	{
+		GD.Print($"Adding enemy: {_enemyTypeOverride}");
+		AddEnemyByType(_enemyTypeOverride);
+	}
+	else
+	{
+		GD.Print("No enemy override - loading default test enemies");
+		// Default test enemies
+		_combat.AddEnemy(Enemy.CreateBackroadsGremmlin());
+		_combat.AddEnemy(Enemy.CreateBarnWirePossum());
+		_combat.AddEnemy(Enemy.CreateOffGridScavver());
+	}
 	
 	// Subscribe to events
 	_combat.OnPhaseChange += OnPhaseChange;
 	_combat.OnCombatEnd += OnCombatEnd;
 	_combat.OnCombatLog += Log;
 	
-	
 	_combat.StartCombat();
 	
 	UpdateUI();
 	PromptNextAction();
+}
+private void AddEnemyByType(string enemyType)
+{
+	Enemy enemy = enemyType switch
+	{
+		"BackroadsGremmlin" => Enemy.CreateBackroadsGremmlin(),
+		"BarnWirePossum" => Enemy.CreateBarnWirePossum(),
+		"OffGridScavver" => Enemy.CreateOffGridScavver(),
+		"SkeletonKeyer" => Enemy.CreateSkeletonKeyer(),
+		"RidgeRunnerHowler" => Enemy.CreateRidgeRunnerHowler(),
+		"BunkerBrute" => Enemy.CreateBunkerBrute(),
+		"BridgeTroll" => Enemy.CreateBridgeTroll(),
+		"NightDialer" => Enemy.CreateNightDialer(),
+		"HornedServerman" => Enemy.CreateHornedServerman(),
+		"BlackBadgeEnforcer" => Enemy.CreateBlackBadgeEnforcer(),
+		"ThunderHollowWyrm" => Enemy.CreateThunderHollowWyrm(),
+		"ArchivistOfEchoVault" => Enemy.CreateArchivistOfEchoVault(),
+		"DirectorOfBeneathNet" => Enemy.CreateDirectorOfBeneathNet(),
+		_ => Enemy.CreateBackroadsGremmlin() // Default fallback
+	};
+	
+	_combat.AddEnemy(enemy);
+	GD.Print($"✅ Added enemy to combat: {enemyType}");
 }
 		
 		private void OnPhaseChange(TurnPhase phase)
@@ -167,6 +193,54 @@ private void InitializeCombat()
 	}
 }
 		
+	private void OnFleeButtonPressed()
+{
+	if (_combat == null || _combat.IsCombatOver) return;
+	
+	GD.Print("🏃 Player attempting to flee...");
+	
+	// Attempt flee (enemies get revenge attacks)
+	bool fleeSuccessful = _combat.AttemptFlee();
+	
+	// Update UI to show any damage taken
+	UpdateUI();
+	
+	if (fleeSuccessful)
+	{
+		GD.Print("✅ Fled successfully! Returning to world in 3 seconds...");
+		
+		// Add to combat log
+		_combatLog.AppendText("\n[color=yellow]You fled from combat![/color]\n");
+		
+		// ✅ NEW - Mark enemy as defeated in GameManager BEFORE returning
+		if (GetTree().Root.HasMeta("combat_enemy_id"))
+		{
+			string enemyID = (string)GetTree().Root.GetMeta("combat_enemy_id");
+			Appanet.Managers.GameManager.Instance?.MarkEnemyDefeated(enemyID);
+			GD.Print($"🏃 Enemy marked as defeated immediately: {enemyID}");
+		}
+		
+		GetTree().Root.SetMeta("returning_from_combat", true);
+		
+		// Wait a moment then return to world
+		GetTree().CreateTimer(3.0).Timeout += () =>
+		{
+			GetTree().ChangeSceneToFile("res://Scenes/World/World.tscn");
+		};
+	}
+	else
+	{
+		// Party was wiped out during flee attempt
+		GD.Print("💀 Party defeated while fleeing!");
+		_combatLog.AppendText("\n[color=red]Your party was defeated while trying to escape![/color]\n");
+		
+		GetTree().CreateTimer(3.0).Timeout += () =>
+		{
+			// Return to world or game over screen
+			GetTree().ChangeSceneToFile("res://Scenes/World/World.tscn");
+		};
+	}
+}
 		
 		private void ShowPlayerActions()
 		{
@@ -458,27 +532,27 @@ private void OnHealTargetSelected(CombatParticipant target)
 	}
 }
 		
-		private void OnCombatEnd(Team winner)
-		{
-			if (winner == Team.Player)
-			{
-				_turnIndicator.Text = "VICTORY!";
-				_turnIndicator.AddThemeColorOverride("font_color", new Color(0, 1, 0));
-			}
-			else
-			{
-				_turnIndicator.Text = "DEFEAT";
-				_turnIndicator.AddThemeColorOverride("font_color", new Color(1, 0, 0));
-			}
-			
-			HidePlayerActions();
-			
-			// Return to test menu after 3 seconds
-			GetTree().CreateTimer(3.0).Timeout += () =>
-			{
-				GetTree().ChangeSceneToFile("res://Scenes/TestScene.tscn");
-			};
-		}
+		private void OnCombatEnd(Team winningTeam)  // ← ADD PARAMETER
+{
+	GD.Print($"=== Combat has ended! Winner: {winningTeam} ===");
+	
+	// ✅ Mark enemy as defeated in GameManager BEFORE returning
+	if (GetTree().Root.HasMeta("combat_enemy_id"))
+	{
+		string enemyID = (string)GetTree().Root.GetMeta("combat_enemy_id");
+		Appanet.Managers.GameManager.Instance?.MarkEnemyDefeated(enemyID);
+		GD.Print($"✅ Enemy marked as defeated immediately: {enemyID}");
+	}
+	
+	// Set metadata for WorldManager to know we're returning from combat
+	GetTree().Root.SetMeta("returning_from_combat", true);
+	
+	// Delay returning to world so player can see final state
+	GetTree().CreateTimer(3.0).Timeout += () =>
+	{
+		GetTree().ChangeSceneToFile("res://Scenes/World/World.tscn");
+	};
+}
 		
 		private void UpdateUI()
 {
