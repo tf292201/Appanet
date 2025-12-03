@@ -76,11 +76,15 @@ namespace Appanet.Scripts.World
 		}
 		
 		public void OpenInventory()
-		{
-			_isInMenu = true;
-			_player.SetInputEnabled(false);
-			GetTree().ChangeSceneToFile("res://Scenes/UI/InventoryScene.tscn");
-		}
+{
+	_isInMenu = true;
+	_player.SetInputEnabled(false);
+	
+	// Mark that we came from world (not from combat)
+	GetTree().Root.SetMeta("from_world_scene", true);
+	
+	GetTree().ChangeSceneToFile("res://Scenes/UI/InventoryScene.tscn");
+}
 		
 		public void StartCombatWithEnemy(string enemyType, string enemyID)
 		{

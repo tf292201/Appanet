@@ -31,47 +31,59 @@ namespace Appanet.Scripts.Combat
 		private Button _specialBtn; 
 		private Button _equipBtn;
 		
-		public override void _Ready()
-		{
-			// Get UI references
-			_playerTeamUI = GetNode<VBoxContainer>("../MainLayout/PlayerTeamPanel/PlayerTeam");
-			_enemyTeamUI = GetNode<VBoxContainer>("../MainLayout/EnemyTeamPanel/EnemyTeam");
-			_combatLog = GetNode<RichTextLabel>("../CombatLog");
-			_actionButtons = GetNode<HBoxContainer>("../ActionButtons");
-			_attackBtn = GetNode<Button>("../ActionButtons/AttackBtn");
-			_itemBtn = GetNode<Button>("../ActionButtons/ItemBtn");
-			_defendBtn = GetNode<Button>("../ActionButtons/DefendBtn"); 
-			_specialBtn = GetNode<Button>("../ActionButtons/SpecialBtn");
-			_targetSelection = GetNode<VBoxContainer>("../TargetSelection");
-			_equipBtn = GetNode<Button>("../ActionButtons/EquipBtn");
-			var _fleeBtn = GetNode<Button>("../ActionButtons/FleeBtn"); 
-			
-			
-			// Create turn indicator label
-			_turnIndicator = new Label();
-			_turnIndicator.Position = new Vector2(400, 30);
-			_turnIndicator.AddThemeFontSizeOverride("font_size", 20);
-			GetNode("..").AddChild(_turnIndicator);
-			
-			
-		
-			
-			// Connect button signals
-			_attackBtn.Pressed += OnAttackButtonPressed;
-			_itemBtn.Pressed += OnItemButtonPressed;
-			_defendBtn.Pressed += OnDefendButtonPressed; 
-			_specialBtn.Pressed += OnSpecialButtonPressed; 
-			_equipBtn.Pressed += OnManageEquipmentPressed;
-			_fleeBtn.Pressed += OnFleeButtonPressed; 
-			
-			
-			InitializeCombat();
-		}
+public override void _Ready()
+{
+	// Get UI references
+	_playerTeamUI = GetNode<VBoxContainer>("../MainLayout/PlayerTeamPanel/PlayerTeam");
+	_enemyTeamUI = GetNode<VBoxContainer>("../MainLayout/EnemyTeamPanel/EnemyTeam");
+	_combatLog = GetNode<RichTextLabel>("../CombatLog");
+	_actionButtons = GetNode<HBoxContainer>("../ActionButtons");
+	_attackBtn = GetNode<Button>("../ActionButtons/AttackBtn");
+	_itemBtn = GetNode<Button>("../ActionButtons/ItemBtn");
+	_defendBtn = GetNode<Button>("../ActionButtons/DefendBtn"); 
+	_specialBtn = GetNode<Button>("../ActionButtons/SpecialBtn");
+	_targetSelection = GetNode<VBoxContainer>("../TargetSelection");
+	_equipBtn = GetNode<Button>("../ActionButtons/EquipBtn");
+	var _fleeBtn = GetNode<Button>("../ActionButtons/FleeBtn"); 
+	
+	// Create turn indicator label
+	_turnIndicator = new Label();
+	_turnIndicator.Position = new Vector2(400, 30);
+	_turnIndicator.AddThemeFontSizeOverride("font_size", 20);
+	GetNode("..").AddChild(_turnIndicator);
+	
+	// Connect button signals
+	_attackBtn.Pressed += OnAttackButtonPressed;
+	_itemBtn.Pressed += OnItemButtonPressed;
+	_defendBtn.Pressed += OnDefendButtonPressed; 
+	_specialBtn.Pressed += OnSpecialButtonPressed; 
+	_equipBtn.Pressed += OnManageEquipmentPressed;
+	_fleeBtn.Pressed += OnFleeButtonPressed;
+	
+	// ✅ Disable equipment management during combat
+	_equipBtn.Disabled = true;
+	_equipBtn.TooltipText = "Cannot change equipment during combat";
+	
+	// Fresh combat - initialize normally
+	InitializeCombat();
+}
+
+
+
+
 		
 private void OnManageEquipmentPressed()
 {
+	GD.Print("📦 Opening inventory from combat...");
+	
+	// Mark that we have an active combat to return to
+	GetTree().Root.SetMeta("active_combat_state", true);
+	
+	// Keep enemy metadata so we know which combat to return to
+	// (combat_enemy_type and combat_enemy_id should already be set)
+	
 	GetTree().ChangeSceneToFile("res://Scenes/UI/InventoryScene.tscn");
-	}
+}
 		
 		
 		
@@ -81,6 +93,9 @@ private void OnManageEquipmentPressed()
 private void InitializeCombat()
 {
 	_combat = new CombatState();
+	
+	// ✅ Store in GameManager so it persists
+	GameManager.Instance.ActiveCombat = _combat;
 	
 	// Add player
 	var player = GameManager.Instance.Player;
@@ -211,13 +226,19 @@ private void AddEnemyByType(string enemyType)
 		
 		// Add to combat log
 		_combatLog.AppendText("\n[color=yellow]You fled from combat![/color]\n");
-		
-		// ✅ NEW - Mark enemy as defeated in GameManager BEFORE returning
+		GameManager.Instance.ActiveCombat = null; 
+		// Mark enemy as defeated in GameManager BEFORE returning
 		if (GetTree().Root.HasMeta("combat_enemy_id"))
 		{
 			string enemyID = (string)GetTree().Root.GetMeta("combat_enemy_id");
 			Appanet.Managers.GameManager.Instance?.MarkEnemyDefeated(enemyID);
 			GD.Print($"🏃 Enemy marked as defeated immediately: {enemyID}");
+		}
+		
+		// Clear active combat state
+		if (GetTree().Root.HasMeta("active_combat_state"))
+		{
+			GetTree().Root.RemoveMeta("active_combat_state");
 		}
 		
 		GetTree().Root.SetMeta("returning_from_combat", true);
@@ -233,6 +254,12 @@ private void AddEnemyByType(string enemyType)
 		// Party was wiped out during flee attempt
 		GD.Print("💀 Party defeated while fleeing!");
 		_combatLog.AppendText("\n[color=red]Your party was defeated while trying to escape![/color]\n");
+		GameManager.Instance.ActiveCombat = null;
+		// Clear active combat state
+		if (GetTree().Root.HasMeta("active_combat_state"))
+		{
+			GetTree().Root.RemoveMeta("active_combat_state");
+		}
 		
 		GetTree().CreateTimer(3.0).Timeout += () =>
 		{
@@ -241,6 +268,7 @@ private void AddEnemyByType(string enemyType)
 		};
 	}
 }
+
 		
 		private void ShowPlayerActions()
 		{
@@ -532,7 +560,7 @@ private void OnHealTargetSelected(CombatParticipant target)
 	}
 }
 		
-		private void OnCombatEnd(Team winningTeam)  // ← ADD PARAMETER
+	private void OnCombatEnd(Team winningTeam)
 {
 	GD.Print($"=== Combat has ended! Winner: {winningTeam} ===");
 	
@@ -542,6 +570,14 @@ private void OnHealTargetSelected(CombatParticipant target)
 		string enemyID = (string)GetTree().Root.GetMeta("combat_enemy_id");
 		Appanet.Managers.GameManager.Instance?.MarkEnemyDefeated(enemyID);
 		GD.Print($"✅ Enemy marked as defeated immediately: {enemyID}");
+	}
+	
+	// Clear active combat state
+	GameManager.Instance.ActiveCombat = null;  // ← CLEAR COMBAT
+	
+	if (GetTree().Root.HasMeta("active_combat_state"))
+	{
+		GetTree().Root.RemoveMeta("active_combat_state");
 	}
 	
 	// Set metadata for WorldManager to know we're returning from combat
@@ -1202,4 +1238,4 @@ private void OnTimingComplete(float multiplier)
 		
 		
 	}
-}
+	}

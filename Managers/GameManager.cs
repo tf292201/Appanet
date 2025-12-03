@@ -3,6 +3,7 @@ using Appanet.Scripts.Models.Characters;
 using Appanet.Scripts.Models.Items;       
 using System.Linq; 
 using System.Collections.Generic;
+using Appanet.Scripts.Models.Combat;
 
 namespace Appanet.Managers
 {
@@ -15,6 +16,7 @@ namespace Appanet.Managers
 		
 		// NEW - Track defeated enemies persistently
 		public HashSet<string> DefeatedEnemies { get; private set; }
+		public CombatState ActiveCombat { get; set; }
 		
 		public override void _Ready()
 		{

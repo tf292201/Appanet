@@ -937,8 +937,28 @@ private void OnUseButtonPressed()
 		
 		private void OnBackPressed()
 		{
-			// Return to previous scene (combat or main menu)
-			GetTree().ChangeSceneToFile("res://Scenes/Combat/CombatTest.tscn");
-		}
+	GD.Print("⬅️ Back button pressed from inventory");
+	
+	// Check if we came from active combat
+	if (GetTree().Root.HasMeta("active_combat_state"))
+	{
+		GD.Print("↩️ Returning to active combat");
+		GetTree().ChangeSceneToFile("res://Scenes/Combat/CombatTest.tscn");
+		return;
+	}
+	
+	// Check if we came from world
+	if (GetTree().Root.HasMeta("from_world_scene"))
+	{
+		GD.Print("↩️ Returning to world");
+		GetTree().Root.RemoveMeta("from_world_scene");
+		GetTree().ChangeSceneToFile("res://Scenes/World/World.tscn");
+		return;
+	}
+	
+	// Default: return to world
+	GD.Print("↩️ Returning to world (default)");
+	GetTree().ChangeSceneToFile("res://Scenes/World/World.tscn");
+}
 	}
 }
