@@ -98,6 +98,9 @@ namespace Appanet.Scripts.UI
 		GD.Print("Connecting BackButton...");
 		backButton.Pressed += OnBackPressed;
 		GD.Print("✓ Back button connected!");
+		GD.Print("Connecting useButton...");
+		_useButton.Pressed += OnUseButtonPressed;
+		GD.Print("✓ useButton connected!");
 		
 		// Setup weapon/armor slot click detection
 		GD.Print("Creating weapon button...");
