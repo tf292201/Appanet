@@ -8,14 +8,17 @@ namespace Appanet.Scripts.World
 		private Label _hpLabel;
 		private Label _moneyLabel;
 		private Button _menuButton;
+		private Button _saveButton;
 		
 		public override void _Ready()
 		{
 			_hpLabel = GetNode<Label>("Control/TopBar/HPLabel");
 			_moneyLabel = GetNode<Label>("Control/TopBar/MoneyLabel");
 			_menuButton = GetNode<Button>("Control/MenuButton");
+			 //_saveButton = GetNode<Button>("Control/SaveButton"); 
 			
 			_menuButton.Pressed += OnMenuPressed;
+			//_saveButton.Pressed += OnSavePressed;
 			
 			UpdateUI();
 		}
@@ -38,5 +41,14 @@ namespace Appanet.Scripts.World
 		{
 			WorldManager.Instance?.OpenInventory();
 		}
+		
+		//private void OnSavePressed()
+		//{
+			//SaveGame.Save();
+	//// Maybe show a "Game Saved!" popup
+		//}
+		
+		
+		
 	}
 }

@@ -15,8 +15,8 @@ namespace Appanet.Scripts.Models.Characters
 		public Inventory Inventory { get; private set; }
 		public int Experience { get; private set; }
 		public int Level { get; private set; }
-		public new Weapon EquippedWeapon { get; private set; }
-		public new Armor EquippedArmor { get; private set; }
+		public Weapon EquippedWeapon { get; private set; }
+		public Armor EquippedArmor { get; private set; }
 		public int Money { get; private set; }
 		public string IconPath { get; private set; } 
 		

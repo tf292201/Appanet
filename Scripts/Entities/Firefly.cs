@@ -10,13 +10,24 @@ public partial class Firefly : Sprite2D
 	
 	// Add these for choppy movement
 	private float moveTimer = 0f;
-	private const float MoveInterval = 0.15f; // Update position every 0.15 seconds
+	private const float MoveInterval = 0.15f;
 	private Vector2 targetPosition;
 	
 	// Add for choppy pulse
 	private int currentPulseFrame = 0;
 	private float pulseTimer = 0f;
-	private const float PulseFrameTime = 0.2f; // Change brightness every 0.2 seconds
+	private const float PulseFrameTime = 0.2f;
+	
+	// NEW - Color mode
+	public enum ColorMode
+	{
+		Normal,    // Natural yellow firefly
+		RedGlitch, // Corrupted red
+		GreenGlitch, // Corrupted green
+		WhiteStatic // Pure white glitch
+	}
+	
+	private ColorMode _colorMode = ColorMode.Normal;
 	
 	public override void _Ready()
 	{
@@ -35,6 +46,32 @@ public partial class Firefly : Sprite2D
 		targetPosition = Position;
 		pulseSpeed = (float)GD.RandRange(2.0, 4.0);
 		pulseTime = (float)GD.RandRange(0, Mathf.Tau);
+		
+		// Check if color mode was set via metadata
+		if (HasMeta("color_mode"))
+		{
+			_colorMode = (ColorMode)(int)GetMeta("color_mode");
+			ApplyColorMode();
+		}
+	}
+	
+	private void ApplyColorMode()
+	{
+		switch (_colorMode)
+		{
+			case ColorMode.Normal:
+				Modulate = new Color(1.0f, 1.0f, 1.0f); // Natural yellow (default texture)
+				break;
+			case ColorMode.RedGlitch:
+				Modulate = new Color(1.5f, 0.3f, 0.3f); // Intense red
+				break;
+			case ColorMode.GreenGlitch:
+				Modulate = new Color(0.3f, 1.5f, 0.4f); // Intense green
+				break;
+			case ColorMode.WhiteStatic:
+				Modulate = new Color(1.8f, 1.8f, 2.0f); // Bright white-blue
+				break;
+		}
 	}
 	
 	private ImageTexture CreateFireflyTexture()
@@ -133,7 +170,10 @@ public partial class Firefly : Sprite2D
 		// Set brightness based on current frame (no smooth transition)
 		float[] brightnessLevels = { 0.3f, 0.6f, 1.0f, 0.6f };
 		float brightness = brightnessLevels[currentPulseFrame];
-		Modulate = new Color(1, 1, 1, brightness);
+		
+		// Apply brightness while preserving color mode
+		Color currentColor = Modulate;
+		Modulate = new Color(currentColor.R, currentColor.G, currentColor.B, brightness);
 		
 		QueueRedraw();
 	}
@@ -141,7 +181,16 @@ public partial class Firefly : Sprite2D
 	public override void _Draw()
 	{
 		// Blockier glow effect - larger, fewer circles
-		DrawCircle(Vector2.Zero, 16, new Color(1.0f, 0.9f, 0.3f, 0.08f));
-		DrawCircle(Vector2.Zero, 10, new Color(1.0f, 0.9f, 0.3f, 0.15f));
+		// Glow color matches the firefly color mode
+		Color glowColor = _colorMode switch
+		{
+			ColorMode.RedGlitch => new Color(1.0f, 0.2f, 0.2f, 0.15f),
+			ColorMode.GreenGlitch => new Color(0.2f, 1.0f, 0.3f, 0.15f),
+			ColorMode.WhiteStatic => new Color(1.0f, 1.0f, 1.0f, 0.2f),
+			_ => new Color(1.0f, 0.9f, 0.3f, 0.15f) // Normal yellow
+		};
+		
+		DrawCircle(Vector2.Zero, 16, glowColor * 0.5f);
+		DrawCircle(Vector2.Zero, 10, glowColor);
 	}
 }

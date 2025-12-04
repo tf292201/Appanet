@@ -20,15 +20,22 @@ namespace Appanet.Managers
 		
 		public override void _Ready()
 		{
+			if (Instance != null && Instance != this)
+   			 {
+   					 GD.PrintErr("⚠️ Multiple GameManager instances detected! Removing duplicate.");
+   					 QueueFree();
+   					 return;
+  			  }
+			
 			Instance = this;
 			PartyMembers = new List<Ally>();
 			DefeatedEnemies = new HashSet<string>();  // NEW
 			InitializeNewGame();
 		}
 		
-		public void InitializeNewGame()
+		public void InitializeNewGame(string playerName = "Investigator")
 		{
-			Player = new Player("Investigator", 100, 10, 3, "res://Assets/Icons/party/Investigator.png");
+			Player = new Player(playerName, 100, 10, 3, "res://Assets/Icons/party/Investigator.png");
 
 			// Add starting weapons
 			var baseballBat = Weapon.CreateBaseballBat();
